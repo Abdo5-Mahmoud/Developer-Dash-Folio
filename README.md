@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Devfolio AI — Design System
 
-## Getting Started
+A neutral-grayscale, single-blue-accent component library for the Devfolio AI
+project: Next.js 16, React 19, TypeScript, Tailwind CSS v4. Built to feel like
+Vercel / Linear / GitHub docs, not a generic AI-generated theme.
 
-First, run the development server:
+## What's in here
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+app/
+  globals.css        design tokens (Tailwind v4 @theme + light/dark CSS vars)
+  layout.tsx          root layout: fonts, ThemeProvider, dark-by-default html
+  showcase/page.tsx   every component rendered together — your visual QA page
+components/
+  theme-provider.tsx
+  ui/
+    button.tsx         5 variants, 4 sizes, loading state, asChild support
+    badge.tsx           default / neutral / outline / success / warning / danger
+    card.tsx             Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter
+    input.tsx  textarea.tsx  label.tsx
+    separator.tsx  avatar.tsx  tabs.tsx  tooltip.tsx
+    callout.tsx         documentation admonitions (info/success/warning/danger)
+    code-block.tsx       ★ signature component — see below
+    breadcrumbs.tsx
+    navbar.tsx  sidebar-nav.tsx  table-of-contents.tsx
+    theme-toggle.tsx
+lib/
+  utils.ts             cn() — clsx + tailwind-merge
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Design tokens
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Defined once in `app/globals.css`, consumed everywhere via Tailwind v4's
+`@theme inline` mapping — so `bg-background`, `text-muted-foreground`,
+`border-border`, `rounded-lg`, `shadow-[var(--shadow-token-md)]` etc. all work
+directly as utility classes, and swap automatically between light and dark.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Token | Dark | Light | Use |
+|---|---|---|---|
+| `--background` | `#09090b` | `#ffffff` | page background |
+| `--surface` | `#101012` | `#ffffff` | cards, panels |
+| `--border` | `#232327` | `#e7e7ea` | hairlines |
+| `--foreground` | `#ededef` | `#101012` | body text |
+| `--muted-foreground` | `#8b8b93` | `#6c6c74` | secondary text |
+| `--accent` | `#3e7bfa` | `#2f5fe0` | the one blue accent |
 
-## Learn More
+Radius scale: `sm 6px / md 8px / lg 12px / xl 16px`.
+Fonts: **Geist** (sans) for UI, **Geist Mono** for code and captions — loaded
+via `next/font/google` in `app/layout.tsx`, no extra install needed.
 
-To learn more about Next.js, take a look at the following resources:
+Dark mode is the default (`<html className="dark">`, `defaultTheme="dark"`
+in the theme provider); light mode is a fully specified parallel palette
+toggled by `ThemeToggle`, not an auto-inversion.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## The signature element
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`CodeBlock` is the piece the rest of the system is built around: window-chrome
+dots, filename/language label, line numbers, and a copy button, styled to look
+like an editor pane rather than a generic `<pre>`. Since every project page in
+Devfolio AI needs to show real source, prompts, and terminal output, this
+component is the visual anchor that ties "portfolio" to "engineering
+documentation."
 
-## Deploy on Vercel
+## Install
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm install next-themes class-variance-authority clsx tailwind-merge \
+  lucide-react framer-motion \
+  @radix-ui/react-slot @radix-ui/react-tabs @radix-ui/react-tooltip \
+  @radix-ui/react-avatar @radix-ui/react-separator @radix-ui/react-label
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+npm install -D tailwindcss @tailwindcss/postcss tw-animate-css
+```
+
+Copy `app/`, `components/`, `lib/` into your project (merge `globals.css` and
+`layout.tsx` with your existing ones if they already exist), then visit
+`/showcase` to see everything rendered together.
+
+Requires a `tsconfig.json` path alias:
+
+```json
+{ "compilerOptions": { "paths": { "@/*": ["./*"] } } }
+```
+
+## Conventions for new components
+
+- Every interactive primitive needs a visible `:focus-visible` ring (already
+  handled globally for the accent color) and must respect
+  `prefers-reduced-motion` (also handled globally).
+- Use `cn()` from `lib/utils.ts` for all conditional class merging.
+- Reach for Radix primitives for anything with state/accessibility semantics
+  (menus, dialogs, popovers) rather than hand-rolling them.
+- Keep animation minimal and purposeful — this system favors precision over
+  motion, per the brief.
