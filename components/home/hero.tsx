@@ -23,7 +23,7 @@ const SOCIAL_LINKS = [
     label: "LinkedIn profile",
     icon: Linkedin,
   },
-  { href: "abdofwzy9@gmail.com", label: "Send an email", icon: Mail },
+  { href: "mailto:abdofwzy9@gmail.com", label: "Send an email", icon: Mail },
 ];
 
 export function Hero() {
@@ -39,7 +39,7 @@ export function Hero() {
         </Badge>
 
         <h1 className="text-4xl font-semibold leading-tight tracking-tight text-foreground md:text-5xl">
-          Your Name
+          Abdullah Mahmoud
         </h1>
 
         <p className="mt-3 max-w-xl text-lg font-medium leading-snug text-foreground/90 md:text-xl">
@@ -97,7 +97,7 @@ export function Hero() {
       <div className="flex justify-center lg:justify-end">
         <Avatar
           src="/avatar.jpeg"
-          alt="Portrait of Your Name"
+          alt="Portrait of Abdullah Mahmoud"
           size={180}
           priority
         />

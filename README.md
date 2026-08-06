@@ -84,4 +84,4 @@ All architectural blueprints and product specs are documented in detail inside t
 
 ---
 
-*Crafted with precision by [Abdelrahman Mahmoud](https://github.com/Abdo5-Mahmoud)*
+*Crafted with precision by [Abdullah Mahmoud](https://github.com/Abdo5-Mahmoud)*
