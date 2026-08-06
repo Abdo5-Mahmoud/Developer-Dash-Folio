@@ -1,94 +1,87 @@
-# Devfolio AI — Design System
+# Devfolio AI 🚀
 
-A neutral-grayscale, single-blue-accent component library for the Devfolio AI
-project: Next.js 16, React 19, TypeScript, Tailwind CSS v4. Built to feel like
-Vercel / Linear / GitHub docs, not a generic AI-generated theme.
+A modern developer portfolio and engineering knowledge base built with **Next.js 16**, **React 19**, **TypeScript**, and **Tailwind CSS v4**. 
 
-## What's in here
+Unlike standard developer portfolios that only show *what* was built, Devfolio AI is engineered like a public technical wiki. It breaks down architectural decisions, trade-offs, algorithms, performance metrics, and the practical AI-assisted workflow (including prompts, iterations, and corrections) behind each project.
 
-```
-app/
-  globals.css        design tokens (Tailwind v4 @theme + light/dark CSS vars)
-  layout.tsx          root layout: fonts, ThemeProvider, dark-by-default html
-  showcase/page.tsx   every component rendered together — your visual QA page
-components/
-  theme-provider.tsx
-  ui/
-    button.tsx         5 variants, 4 sizes, loading state, asChild support
-    badge.tsx           default / neutral / outline / success / warning / danger
-    card.tsx             Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter
-    input.tsx  textarea.tsx  label.tsx
-    separator.tsx  avatar.tsx  tabs.tsx  tooltip.tsx
-    callout.tsx         documentation admonitions (info/success/warning/danger)
-    code-block.tsx       ★ signature component — see below
-    breadcrumbs.tsx
-    navbar.tsx  sidebar-nav.tsx  table-of-contents.tsx
-    theme-toggle.tsx
-lib/
-  utils.ts             cn() — clsx + tailwind-merge
-```
+> **Status:** 🛠️ **Phase 1 in progress**  
+> The core design system and **Home Page** are live! Full project case studies, AI workflow deep-dives, and the admin content system are being rolled out next.
 
-## Design tokens
+---
 
-Defined once in `app/globals.css`, consumed everywhere via Tailwind v4's
-`@theme inline` mapping — so `bg-background`, `text-muted-foreground`,
-`border-border`, `rounded-lg`, `shadow-[var(--shadow-token-md)]` etc. all work
-directly as utility classes, and swap automatically between light and dark.
+## 💡 The Vision
 
-| Token | Dark | Light | Use |
-|---|---|---|---|
-| `--background` | `#09090b` | `#ffffff` | page background |
-| `--surface` | `#101012` | `#ffffff` | cards, panels |
-| `--border` | `#232327` | `#e7e7ea` | hairlines |
-| `--foreground` | `#ededef` | `#101012` | body text |
-| `--muted-foreground` | `#8b8b93` | `#6c6c74` | secondary text |
-| `--accent` | `#3e7bfa` | `#2f5fe0` | the one blue accent |
+Most portfolios read like static resumes. Devfolio AI is designed for hiring managers, tech leads, and fellow engineers who care about **how you think**:
+- **Engineering Judgment over Hype:** Showing trade-offs, system boundaries, and code rationale.
+- **Transparent AI Collaboration:** Documenting how AI was leveraged as a pair programmer — and where human oversight corrected AI mistakes.
+- **Low-Friction & Scale:** Built to easily expand from a few highlight projects to a comprehensive engineering knowledge base.
 
-Radius scale: `sm 6px / md 8px / lg 12px / xl 16px`.
-Fonts: **Geist** (sans) for UI, **Geist Mono** for code and captions — loaded
-via `next/font/google` in `app/layout.tsx`, no extra install needed.
+---
 
-Dark mode is the default (`<html className="dark">`, `defaultTheme="dark"`
-in the theme provider); light mode is a fully specified parallel palette
-toggled by `ThemeToggle`, not an auto-inversion.
+## 🛠️ Tech Stack
 
-## The signature element
+- **Framework:** Next.js 16 (App Router)
+- **UI & React:** React 19, TypeScript
+- **Styling:** Tailwind CSS v4 (with `@theme inline` design tokens & dark-mode by default)
+- **Primitives & Icons:** Radix UI (`@radix-ui/react-slot`, `tabs`, `avatar`, `tooltip`, etc.), Lucide React
+- **Animations:** Framer Motion
 
-`CodeBlock` is the piece the rest of the system is built around: window-chrome
-dots, filename/language label, line numbers, and a copy button, styled to look
-like an editor pane rather than a generic `<pre>`. Since every project page in
-Devfolio AI needs to show real source, prompts, and terminal output, this
-component is the visual anchor that ties "portfolio" to "engineering
-documentation."
+---
 
-## Install
+## 📍 Project Roadmap & Current Phase
 
-```bash
-npm install next-themes class-variance-authority clsx tailwind-merge \
-  lucide-react framer-motion \
-  @radix-ui/react-slot @radix-ui/react-tabs @radix-ui/react-tooltip \
-  @radix-ui/react-avatar @radix-ui/react-separator @radix-ui/react-label
+- [x] **Phase 1: Foundation & Home Page**
+  - Dark-first Vercel/Linear-inspired visual design system (`app/globals.css`).
+  - Home Page with Hero section, technology highlight strip, and featured project cards (`components/home/hero.tsx`, `app/page.tsx`).
+  - Accessible navigation bar and site footer.
+- [ ] **Phase 2: Project Case Studies (`/projects` & `/projects/[slug]`)**
+  - Full structured architectural breakdowns for each project.
+- [ ] **Phase 3: AI Development Workflow (`/ai-workflow`)**
+  - Dedicated page detailing AI-assisted development methodology and real-world prompt breakdowns.
+- [ ] **Phase 4: Admin Dashboard & CMS (`/dashboard`)**
+  - Protected admin routes to quickly add/edit projects, technologies, and skills.
 
-npm install -D tailwindcss @tailwindcss/postcss tw-animate-css
-```
+---
 
-Copy `app/`, `components/`, `lib/` into your project (merge `globals.css` and
-`layout.tsx` with your existing ones if they already exist), then visit
-`/showcase` to see everything rendered together.
+## 📂 Documentation & Specs
 
-Requires a `tsconfig.json` path alias:
+All architectural blueprints and product specs are documented in detail inside the [`docs`](file:///c:/Users/A5/Desktop/cv-project/devfolio/docs) directory:
 
-```json
-{ "compilerOptions": { "paths": { "@/*": ["./*"] } } }
-```
+- [PRD (Product Requirements Document)](file:///c:/Users/A5/Desktop/cv-project/devfolio/docs/prd.md) — Product goals, personas, and feature definitions.
+- [Information Architecture](file:///c:/Users/A5/Desktop/cv-project/devfolio/docs/information-architecture.md) — Sitemap, routing patterns, and data flow.
+- [Page Assembly Specification](file:///c:/Users/A5/Desktop/cv-project/devfolio/docs/page-assembly-specification.md) — UI composition rules across public and admin pages.
+- [Hero Specification](file:///c:/Users/A5/Desktop/cv-project/devfolio/hero-feature-specification.md) — Specific component design for the hero section.
 
-## Conventions for new components
+---
 
-- Every interactive primitive needs a visible `:focus-visible` ring (already
-  handled globally for the accent color) and must respect
-  `prefers-reduced-motion` (also handled globally).
-- Use `cn()` from `lib/utils.ts` for all conditional class merging.
-- Reach for Radix primitives for anything with state/accessibility semantics
-  (menus, dialogs, popovers) rather than hand-rolling them.
-- Keep animation minimal and purposeful — this system favors precision over
-  motion, per the brief.
+## ⚡ Getting Started
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Abdo5-Mahmoud/Developer-Dash-Folio.git
+   cd devfolio
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
+
+---
+
+## 🧱 Design System Highlights
+
+- **Palette:** Neutral dark background (`#09090b`), subtle hairlines (`#232327`), paired with a single focused blue accent (`#3e7bfa`).
+- **Signature Component:** `CodeBlock` — built to render technical code, CLI commands, and prompts with window chrome controls, line numbers, and copy functionality.
+- **Theme Support:** Dark mode by default, backed by Next Themes and clean CSS variable mappings.
+
+---
+
+*Crafted with precision by [Abdelrahman Mahmoud](https://github.com/Abdo5-Mahmoud)*
