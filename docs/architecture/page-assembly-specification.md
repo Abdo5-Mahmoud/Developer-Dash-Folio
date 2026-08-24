@@ -2,7 +2,7 @@
 
 ## Devfolio AI — UI Composition Blueprint
 
-**Inputs:** `prd.md`, `information-architecture.md`, existing Design System and reusable UI components  
+**Inputs:** [`prd.md`](../product/prd.md), [`information-architecture.md`](information-architecture.md), existing Design System and reusable UI components  
 **Scope:** Home, Project Detail, Admin Create Project, AI Development Workflow  
 **Status:** Ready for frontend implementation
 

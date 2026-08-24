@@ -1,9 +1,9 @@
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { Badge } from "@/components/ui/badge";
-import { getAllSkills } from "@/lib/data";
+import { getAllSkills } from "@/features/home/lib/skills";
 
-export default async function AboutPage() {
+export default async function page() {
   const skills = await getAllSkills();
   const grouped = skills.reduce<Record<string, typeof skills>>((acc, s) => {
     (acc[s.category] ??= []).push(s);

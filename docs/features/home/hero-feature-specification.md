@@ -3,7 +3,7 @@
 ## Devfolio AI â€” Home Page Hero
 
 **Parent page:** Home (`/`)  
-**Source documents:** `prd.md`, `information-architecture.md`, `page-assembly-specification.md`, existing Design System  
+**Source documents:** [`prd.md`](../../product/prd.md), [`information-architecture.md`](../../architecture/information-architecture.md), [`page-assembly-specification.md`](../../architecture/page-assembly-specification.md), existing Design System  
 **Scope:** Product, UX, accessibility, and frontend composition specification only. No implementation.
 
 ---

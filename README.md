@@ -45,12 +45,12 @@ Most portfolios read like static resumes. Devfolio AI is designed for hiring man
 
 ## 📂 Documentation & Specs
 
-All architectural blueprints and product specs are documented in detail inside the [`docs`](file:///c:/Users/A5/Desktop/cv-project/devfolio/docs) directory:
+All architectural blueprints and product specs are documented in detail inside the [`docs`](docs) directory:
 
-- [PRD (Product Requirements Document)](file:///c:/Users/A5/Desktop/cv-project/devfolio/docs/prd.md) — Product goals, personas, and feature definitions.
-- [Information Architecture](file:///c:/Users/A5/Desktop/cv-project/devfolio/docs/information-architecture.md) — Sitemap, routing patterns, and data flow.
-- [Page Assembly Specification](file:///c:/Users/A5/Desktop/cv-project/devfolio/docs/page-assembly-specification.md) — UI composition rules across public and admin pages.
-- [Hero Specification](file:///c:/Users/A5/Desktop/cv-project/devfolio/hero-feature-specification.md) — Specific component design for the hero section.
+- [PRD (Product Requirements Document)](docs/product/prd.md) — Product goals, personas, and feature definitions.
+- [Information Architecture](docs/architecture/information-architecture.md) — Sitemap, routing patterns, and data flow.
+- [Page Assembly Specification](docs/architecture/page-assembly-specification.md) — UI composition rules across public and admin pages.
+- [Hero Specification](docs/features/home/hero-feature-specification.md) — Specific component design for the hero section.
 
 ---
 

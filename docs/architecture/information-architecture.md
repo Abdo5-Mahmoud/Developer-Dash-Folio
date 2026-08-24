@@ -2,7 +2,7 @@
 
 ## Devfolio AI — Developer Portfolio & Engineering Knowledge Base
 
-**Source:** `prd.md`  
+**Source:** [`prd.md`](../product/prd.md)  
 **Status:** Architecture blueprint v1.0  
 **Last updated:** August 2026
 

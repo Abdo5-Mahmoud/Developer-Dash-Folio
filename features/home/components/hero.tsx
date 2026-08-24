@@ -3,6 +3,7 @@ import { ArrowRight, Github, Linkedin, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import { SOCIAL_LINKS } from "@/features/contact/data/contact";
 
 const TECH_HIGHLIGHTS = [
   "React",
@@ -10,20 +11,6 @@ const TECH_HIGHLIGHTS = [
   "TypeScript",
   "Tailwind CSS",
   "Node.js",
-];
-
-const SOCIAL_LINKS = [
-  {
-    href: "https://github.com/Abdo5-Mahmoud",
-    label: "GitHub profile",
-    icon: Github,
-  },
-  {
-    href: "https://www.linkedin.com/in/abdo-fwzy/",
-    label: "LinkedIn profile",
-    icon: Linkedin,
-  },
-  { href: "mailto:abdofwzy9@gmail.com", label: "Send an email", icon: Mail },
 ];
 
 export function Hero() {

@@ -1,15 +1,15 @@
-import Link from "next/link";
-import {
-  ProjectCard,
-  type ProjectCardData,
-} from "@/components/project/project-card";
-import { getFeaturedProjects, getAllTechnologies } from "@/lib/data";
+import { getFeaturedProjects } from "@/features/projects/lib/projects";
+import { getAllTechnologies } from "@/features/home/lib/skills";
 import { Navbar } from "@/components/layout/navbar";
-import { Hero } from "@/components/home/hero";
+import { Hero } from "@/features/home/components/hero";
+import { AboutSection } from "@/features/about/components/about-section";
+import { SkillsSection } from "@/features/home/components/skills-section";
+import { FeaturedProjectsSection } from "@/features/projects/components/featured-projects-section";
+import { ContactSection } from "@/features/home/components/contact-section";
 import { Footer } from "@/components/layout/footer";
 
 export default async function HomePage() {
-  const featured: ProjectCardData[] = await getFeaturedProjects();
+  const featured = await getFeaturedProjects();
   const tech = await getAllTechnologies();
 
   return (
@@ -32,30 +32,16 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Featured projects */}
-        <section className="mx-auto max-w-6xl px-6 py-16">
-          <div className="mb-8 flex items-end justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-foreground">
-                Featured work
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Selected projects with full architecture write-ups.
-              </p>
-            </div>
-            <Link
-              href="/projects"
-              className="text-sm text-accent hover:underline"
-            >
-              View all →
-            </Link>
-          </div>
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {featured.map((p) => (
-              <ProjectCard key={p.slug} project={p} />
-            ))}
-          </div>
-        </section>
+        {/* About section */}
+        <AboutSection />
+
+        {/* Skills section */}
+        <SkillsSection />
+
+        {/* Featured projects section */}
+        <FeaturedProjectsSection projects={featured} />
+
+        <ContactSection />
       </main>
       <Footer />
     </div>
