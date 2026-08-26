@@ -1,23 +1,17 @@
 "use client";
 
-import {
-  useState,
-  useRef,
-  useEffect,
-  SubmitEventHandler,
-  FormEvent,
-} from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { SendHorizonal } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Callout } from "@/components/ui/callout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import { askPortfolioAssistant, TOPIC_INTRO } from "../lib/mock-ai";
 import type { AiWorkflowStatus, ChatMessage } from "../types/ai-workflow";
 import { createMessageId } from "../types/ai-workflow";
-import { askPortfolioAssistant, TOPIC_INTRO } from "../lib/mock-ai";
 
 const SUGGESTED_QUESTIONS = [
   "What are your main skills?",
@@ -33,7 +27,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+      className={`flex ${isUser ? "justify-end" : "justify-start"} relative`}
     >
       <div
         className={
@@ -66,7 +60,7 @@ export function AiAssistant() {
     const node = scrollRef.current;
     if (node) {
       node.scrollTo({
-        top: node.scrollHeight,
+        top: scrollRef.current?.scrollHeight,
         behavior: shouldReduceMotion ? "auto" : "smooth",
       });
     }
@@ -110,7 +104,7 @@ export function AiAssistant() {
   return (
     <section
       aria-labelledby="ai-assistant-heading "
-      className="flex overflow-hidden flex-col gap-4"
+      className="flex overflow-hidden flex-col flex-1 gap-4 px-6 py-10 mx-auto w-full max-w-3xl min-h-0"
     >
       <h2 id="ai-assistant-heading" className="sr-only">
         Portfolio assistant conversation
@@ -118,54 +112,58 @@ export function AiAssistant() {
 
       <div
         ref={scrollRef}
-        role="log"
-        aria-live="polite"
-        aria-label="Conversation with the portfolio assistant"
-        className="flex overflow-y-auto flex-col gap-3 p-4 rounded-lg border h-95 border-border bg-background sm:h-110"
+        className="overflow-y-scroll overscroll-contain flex-1 max-h-64 min-h-96"
       >
-        {messages.length === 0 && !isLoading ? (
-          <div className="flex flex-col gap-4 items-start py-6">
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              Hi! I&apos;m the portfolio assistant. {TOPIC_INTRO} Answers come
-              only from information published on this site.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {SUGGESTED_QUESTIONS.map((question) => (
-                <Button
-                  key={question}
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => void sendQuestion(question)}
-                >
-                  {question}
-                </Button>
-              ))}
+        <div
+          role="log"
+          aria-live="polite"
+          aria-label="Conversation with the portfolio assistant"
+          className="flex flex-col gap-3 p-4 rounded-lg border border-border bg-background"
+        >
+          {messages.length === 0 && !isLoading ? (
+            <div className="flex flex-col gap-4 items-start py-6">
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Hi! I&apos;m the portfolio assistant. {TOPIC_INTRO} Answers come
+                only from information published on this site.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {SUGGESTED_QUESTIONS.map((question) => (
+                  <Button
+                    key={question}
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => void sendQuestion(question)}
+                  >
+                    {question}
+                  </Button>
+                ))}
+              </div>
             </div>
-          </div>
-        ) : (
-          messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
-          ))
-        )}
+          ) : (
+            messages.map((message) => (
+              <MessageBubble key={message.id} message={message} />
+            ))
+          )}
 
-        {isLoading && (
-          <div className="flex justify-start">
-            <div
-              aria-hidden="true"
-              className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-4 py-3"
-            >
-              {[0, 1, 2].map((dot) => (
-                <span
-                  key={dot}
-                  className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground motion-reduce:animate-none"
-                />
-              ))}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div
+                aria-hidden="true"
+                className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-4 py-3"
+              >
+                {[0, 1, 2].map((dot) => (
+                  <span
+                    key={dot}
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground motion-reduce:animate-none"
+                  />
+                ))}
+              </div>
+              <span className="sr-only" role="status">
+                Assistant is typing…
+              </span>
             </div>
-            <span className="sr-only" role="status">
-              Assistant is typing…
-            </span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {status === "error" && (

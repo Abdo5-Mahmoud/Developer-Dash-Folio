@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 
 export default function page() {
   return (
-    <div className="flex overflow-hidden flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="overflow-hidden flex-1 min-h-0">
+      <main className="flex flex-col flex-1 min-h-0">
         <section className="px-6 pt-16 pb-10 mx-auto w-full max-w-3xl">
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">
             AI Workflow
@@ -26,9 +26,7 @@ export default function page() {
           </p>
         </section>
 
-        <section className="px-6 py-10 mx-auto w-full max-w-3xl">
-          <AiAssistant />
-        </section>
+        <AiAssistant />
       </main>
       <Footer />
     </div>
