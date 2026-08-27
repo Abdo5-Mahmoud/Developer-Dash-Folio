@@ -49,6 +49,12 @@ export interface DecisionEntry {
 
 export type ProjectStatus = "draft" | "published";
 
+// Form/API payload shape — id and timestamps are server-assigned.
+export type ProjectInput = Omit<Project, "id" | "slug" | "status" | "createdAt" | "updatedAt"> & {
+  slug?: string;
+  status?: ProjectStatus;
+};
+
 export interface Project {
   id: string;
   slug: string;

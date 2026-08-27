@@ -5,14 +5,14 @@ import { Schema, model, models, type Document } from "mongoose";
 // eyeball on every schema change.
 
 const GalleryImageSchema = new Schema(
-  { url: { type: String, required: true }, caption: String },
+  { url: { type: String, required: true }, alt: String, caption: String },
   { _id: false }
 );
 
 const StackEntrySchema = new Schema(
   {
-    technologyId: { type: Schema.Types.ObjectId, ref: "Technology", required: true },
-    name: { type: String, required: true }, // denormalized for display — refresh on write
+    technologyId: { type: String, required: true },
+    name: { type: String, required: true }, // denormalized for display
   },
   { _id: false }
 );
@@ -68,15 +68,20 @@ const ProjectSchema = new Schema(
   {
     slug: { type: String, required: true, unique: true, index: true },
     title: { type: String, required: true },
+    category: String,
+    features: [String],
     summary: { type: String, required: true },
     fullDescription: { type: String, required: true },
     status: { type: String, enum: ["draft", "published"], default: "draft", index: true },
-    coverImage: { type: String, required: true },
+    coverImage: String,
+    coverImageAlt: String,
     gallery: [GalleryImageSchema],
     githubUrl: String,
     liveUrl: String,
-    techStack: { type: [StackEntrySchema], validate: (v: unknown[]) => v.length > 0 },
-    skillIds: [{ type: Schema.Types.ObjectId, ref: "Skill" }],
+    // Non-empty techStack is enforced at publish time in validateProject,
+    // not here — drafts are allowed to be incomplete.
+    techStack: { type: [StackEntrySchema] },
+    skillIds: [String],
     folderStructure: String,
     architectureExplanation: String,
     dataFlow: String,
@@ -97,10 +102,31 @@ const ProjectSchema = new Schema(
 export interface ProjectDocument extends Document {
   slug: string;
   title: string;
+  category?: string;
+  features: string[];
+  summary: string;
+  fullDescription: string;
   status: "draft" | "published";
+  coverImage?: string;
+  coverImageAlt?: string;
+  gallery: { url: string; alt?: string; caption?: string }[];
+  githubUrl?: string;
+  liveUrl?: string;
+  techStack: { technologyId: string; name: string }[];
+  skillIds: string[];
+  folderStructure?: string;
+  architectureExplanation?: string;
+  dataFlow?: string;
+  reactPatterns: { name: string; rationale: string }[];
+  algorithms: { name: string; rationale: string; complexity?: string }[];
+  performanceOptimizations: { technique: string; impact?: string }[];
+  challenges: { challenge: string; resolution: string }[];
+  lessonsLearned?: string;
+  aiPrompts: { purpose: string; prompt: string }[];
+  aiMistakes: { mistake: string; caughtBy: string; correction: string }[];
+  engineeringDecisions: { decision: string; alternatives: string[]; rationale: string }[];
   featured: boolean;
   displayOrder: number;
-  // ...remaining fields match ProjectSchema above / lib/types.ts Project
 }
 
 // `models.Project ||` guards against Next.js hot-reload redefining the model
