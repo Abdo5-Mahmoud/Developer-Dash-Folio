@@ -9,7 +9,7 @@ import { Callout } from "@/components/ui/callout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { askPortfolioAssistant, TOPIC_INTRO } from "../lib/mock-ai";
+import { askPortfolioAssistant, TOPIC_INTRO } from "../lib/assistant";
 import type { AiWorkflowStatus, ChatMessage } from "../types/ai-workflow";
 import { createMessageId } from "../types/ai-workflow";
 
@@ -82,6 +82,7 @@ export function AiAssistant() {
 
     try {
       const response = await askPortfolioAssistant({ question: trimmed });
+      console.log(response);
       setMessages((current) => [
         ...current,
         {

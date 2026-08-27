@@ -2,10 +2,6 @@ import mongoose from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-  throw new Error("Missing MONGODB_URI environment variable");
-}
-
 // Cache the connection across hot reloads in dev — without this, every
 // file change reconnects and eventually exhausts MongoDB's connection pool.
 interface MongooseCache {
@@ -22,6 +18,11 @@ const cache: MongooseCache = global._mongooseCache ?? { conn: null, promise: nul
 global._mongooseCache = cache;
 
 export async function connectToDatabase() {
+  // Fail fast at connection time rather than module evaluation, so builds
+  // and static analysis can import this module without a configured database.
+  if (!MONGODB_URI) {
+    throw new Error("Missing MONGODB_URI environment variable");
+  }
   if (cache.conn) return cache.conn;
   if (!cache.promise) {
     cache.promise = mongoose.connect(MONGODB_URI as string);

@@ -33,12 +33,20 @@ export function validateContactForm(
   return errors;
 }
 
-// Mock transport for the frontend phase. Replace this function body with a
-// POST to /api/contact when the backend lands — the UI contract does not change.
 export async function submitContactMessage(
   values: ContactFormValues,
 ): Promise<ContactSubmissionResult> {
-  await new Promise((resolve) => setTimeout(resolve, 900));
+  const response = await fetch("/api/contact", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(values),
+  });
 
-  return { ok: true };
+  const result = (await response.json()) as ContactSubmissionResult;
+
+  if (!response.ok || !result.ok) {
+    throw new Error("Contact submission failed");
+  }
+
+  return result;
 }
