@@ -1,12 +1,17 @@
 import "node:crypto";
 
-import { createHmac, scrypt as scryptCallback, timingSafeEqual, type ScryptOptions } from "node:crypto";
+import {
+  createHmac,
+  scrypt as scryptCallback,
+  timingSafeEqual,
+  type ScryptOptions,
+} from "node:crypto";
 
 function scrypt(
   password: string,
   salt: Buffer,
   keylen: number,
-  options: ScryptOptions
+  options: ScryptOptions,
 ): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     scryptCallback(password, salt, keylen, options, (error, derivedKey) => {
@@ -35,11 +40,15 @@ function getAuthConfig(): AuthConfig {
 
   if (!ADMIN_EMAIL || !ADMIN_PASSWORD_HASH || !AUTH_SECRET) {
     throw new Error(
-      "Missing ADMIN_EMAIL, ADMIN_PASSWORD_HASH, or AUTH_SECRET environment variable"
+      "Missing ADMIN_EMAIL, ADMIN_PASSWORD_HASH, or AUTH_SECRET environment variable",
     );
   }
 
-  return { email: ADMIN_EMAIL, passwordHash: ADMIN_PASSWORD_HASH, secret: AUTH_SECRET };
+  return {
+    email: ADMIN_EMAIL,
+    passwordHash: ADMIN_PASSWORD_HASH,
+    secret: AUTH_SECRET,
+  };
 }
 
 function encode(value: string) {
@@ -63,7 +72,8 @@ function safeEqual(left: Buffer, right: Buffer) {
  * scrypt$N$r$p$base64url-salt$base64url-derived-key
  */
 async function verifyPassword(password: string, storedHash: string) {
-  const [algorithm, n, r, p, salt, derivedKey, ...extra] = storedHash.split("$");
+  const [algorithm, n, r, p, salt, derivedKey, ...extra] =
+    storedHash.split("$");
   if (
     algorithm !== "scrypt" ||
     extra.length > 0 ||
@@ -92,30 +102,45 @@ async function verifyPassword(password: string, storedHash: string) {
     return false;
   }
 
-  const actual = await scrypt(password, Buffer.from(salt, "base64url"), expected.length, {
-    N: cost,
-    r: blockSize,
-    p: parallelization,
-  });
+  const actual = await scrypt(
+    password,
+    Buffer.from(salt, "base64url"),
+    expected.length,
+    {
+      N: cost,
+      r: blockSize,
+      p: parallelization,
+    },
+  );
 
   return safeEqual(actual, expected);
 }
 
-export async function validateAdminCredentials(email: string, password: string) {
+export async function validateAdminCredentials(
+  email: string,
+  password: string,
+) {
   const config = getAuthConfig();
-  if (!safeEqual(Buffer.from(email), Buffer.from(config.email))) return false;
+  const normalizedInput = email.trim().toLowerCase();
+  const normalizedTarget = config.email.trim().toLowerCase();
+  if (!safeEqual(Buffer.from(normalizedInput), Buffer.from(normalizedTarget))) return false;
   return verifyPassword(password, config.passwordHash);
 }
 
 export function createSession(email: string) {
   const { secret } = getAuthConfig();
   const payload = encode(
-    JSON.stringify({ email, expiresAt: Date.now() + SESSION_DURATION_SECONDS * 1000 } satisfies Session)
+    JSON.stringify({
+      email: email.trim().toLowerCase(),
+      expiresAt: Date.now() + SESSION_DURATION_SECONDS * 1000,
+    } satisfies Session),
   );
   return `${payload}.${sign(payload, secret)}`;
 }
 
-export function verifySession(sessionToken: string | undefined): Session | null {
+export function verifySession(
+  sessionToken: string | undefined,
+): Session | null {
   if (!sessionToken) return null;
 
   const [payload, signature, ...extra] = sessionToken.split(".");
@@ -124,14 +149,18 @@ export function verifySession(sessionToken: string | undefined): Session | null 
   try {
     const { secret, email } = getAuthConfig();
     const expectedSignature = sign(payload, secret);
-    if (!safeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) return null;
+    if (!safeEqual(Buffer.from(signature), Buffer.from(expectedSignature)))
+      return null;
 
     const session = JSON.parse(decode(payload)) as Session;
     if (
       typeof session.email !== "string" ||
       typeof session.expiresAt !== "number" ||
       session.expiresAt <= Date.now() ||
-      !safeEqual(Buffer.from(session.email), Buffer.from(email))
+      !safeEqual(
+        Buffer.from(session.email.trim().toLowerCase()),
+        Buffer.from(email.trim().toLowerCase()),
+      )
     ) {
       return null;
     }
@@ -148,10 +177,22 @@ export const DEFAULT_LOGIN_REDIRECT = "/admin/dashboard";
  * Accepts only relative same-origin paths ("/foo", "/foo?bar=1").
  * Anything else falls back to the dashboard.
  */
-export function sanitizeRedirectPath(value: string | FormDataEntryValue | null | undefined) {
-  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//")
-    ? value
-    : DEFAULT_LOGIN_REDIRECT;
+export function sanitizeRedirectPath(
+  value: string | FormDataEntryValue | null | undefined,
+) {
+  if (
+    typeof value !== "string" ||
+    !value.startsWith("/") ||
+    value.startsWith("//")
+  ) {
+    return DEFAULT_LOGIN_REDIRECT;
+  }
+
+  if (value === "/admin" || value === "/admin/") {
+    return DEFAULT_LOGIN_REDIRECT;
+  }
+
+  return value;
 }
 
 export const sessionCookie = {
