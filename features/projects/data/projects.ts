@@ -28,9 +28,9 @@ export const PROJECTS: Project[] = [
       { technologyId: "t5", name: "Tailwind CSS" },
     ],
     skillIds: ["s1", "s3"],
-    folderStructure: `app/\n  (public)/\n    page.tsx\n    projects/[slug]/page.tsx\n  admin/\n    dashboard/page.tsx\nlib/\n  models/\n  data.ts\ncomponents/\n  ui/\n  project/`,
+    folderStructure: `app/\n  (public)/\n    page.tsx\n    projects/[slug]/page.tsx\n  admin/\n    dashboard/page.tsx\nfeatures/\n  projects/lib/projects.ts\nlib/\n  models/\ncomponents/\n  ui/\n  project/`,
     architectureExplanation:
-      "Server components fetch project data directly from MongoDB via a thin data-access layer (lib/data.ts), keeping the client bundle free of DB drivers. The admin dashboard is a separate route group behind middleware-based auth, sharing the same design system components as the public site so admin-authored content previews accurately before publish.",
+      "Server components fetch project data directly from MongoDB via the feature-local data-access layer (features/projects/lib/projects.ts), keeping the client bundle free of DB drivers. The admin dashboard is a separate route group behind middleware-based auth, sharing the same design system components as the public site so admin-authored content previews accurately before publish.",
     dataFlow:
       "Admin submits a project form → API route validates payload → Mongoose writes to MongoDB with status='draft' → owner reviews on a preview route → status flips to 'published' → public routes (ISR-revalidated) start serving it.",
     reactPatterns: [

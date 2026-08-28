@@ -17,9 +17,12 @@ export function AdminSidebar() {
   return (
     <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-border bg-surface-sunken">
       <div className="px-5 py-4">
-        <span className="font-mono text-sm font-semibold text-foreground">
+        <Link
+          href="/"
+          className="font-mono text-sm font-semibold text-foreground"
+        >
           devfolio<span className="text-accent">.ai</span>
-        </span>
+        </Link>
         <p className="mt-0.5 text-xs text-muted-foreground">Admin</p>
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3">
@@ -34,7 +37,7 @@ export function AdminSidebar() {
                 "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 active
                   ? "bg-accent-muted text-accent"
-                  : "text-muted-foreground hover:bg-surface-hover hover:text-foreground"
+                  : "text-muted-foreground hover:bg-surface-hover hover:text-foreground",
               )}
             >
               <Icon className="h-4 w-4" />

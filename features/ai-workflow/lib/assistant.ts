@@ -2,9 +2,9 @@ import type {
   AiWorkflowRequest,
   AiWorkflowResponse,
 } from "../types/ai-workflow";
-import { PORTFOLIO_KNOWLEDGE } from "../data/knowledge";
+import { PROFILE_CONTACT } from "@/features/contact/data/contact";
 
-export const TOPIC_INTRO = `You can ask me about ${PORTFOLIO_KNOWLEDGE.owner.name}'s contact information, skills, technologies, projects, or background.`;
+export const TOPIC_INTRO = `You can ask me about ${PROFILE_CONTACT.name}'s contact information, skills, technologies, projects, or background.`;
 
 export const MAX_QUESTION_LENGTH = 500;
 

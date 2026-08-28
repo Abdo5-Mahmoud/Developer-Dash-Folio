@@ -15,6 +15,7 @@ const links = [
   { href: "/ai-workflow", label: "AI Workflow" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
+  { href: "/admin/dashboard", label: "Dashboard" },
 ];
 
 export function Navbar({ className }: { className?: string }) {

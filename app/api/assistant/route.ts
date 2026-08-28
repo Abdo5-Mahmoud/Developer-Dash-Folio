@@ -1,19 +1,10 @@
-import { PORTFOLIO_KNOWLEDGE } from "@/features/ai-workflow/data/knowledge";
+import { getPortfolioKnowledge } from "@/features/ai-workflow/data/knowledge";
 import { MAX_QUESTION_LENGTH } from "@/features/ai-workflow/lib/assistant";
 
 const GEMINI_API_KEY = process.env.Gemini_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
 const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_OUTPUT_TOKENS = 1000;
-
-const SYSTEM_INSTRUCTIONS = [
-  "You are the portfolio assistant on this website.",
-  "Answer the user's question using ONLY the knowledge below.",
-  "If the answer is not in the knowledge, say you don't know and briefly list the topics that are available: contact information, skills, technologies, projects, background.",
-  "Reply with concise plain text only — no markdown headings, no invented facts.",
-  "",
-  `KNOWLEDGE: ${JSON.stringify(PORTFOLIO_KNOWLEDGE)}`,
-].join("\n");
 
 interface GeminiPart {
   text?: string;
@@ -62,6 +53,22 @@ export async function POST(request: Request) {
     return Response.json({ error: "Assistant unavailable" }, { status: 500 });
   }
 
+  let portfolioKnowledge;
+  try {
+    portfolioKnowledge = await getPortfolioKnowledge();
+  } catch {
+    return Response.json({ error: "Assistant unavailable" }, { status: 500 });
+  }
+
+  const systemInstructions = [
+    "You are the portfolio assistant on this website.",
+    "Answer the user's question using ONLY the knowledge below.",
+    "If the answer is not in the knowledge, say you don't know and briefly list the topics that are available: contact information, skills, technologies, projects, background.",
+    "Reply with concise plain text only — no markdown headings, no invented facts.",
+    "",
+    `KNOWLEDGE: ${JSON.stringify(portfolioKnowledge)}`,
+  ].join("\n");
+
   let upstream: Response;
   try {
     upstream = await fetch(
@@ -71,7 +78,7 @@ export async function POST(request: Request) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [{ parts: [{ text: question.trim() }], role: "user" }],
-          systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTIONS }] },
+          systemInstruction: { parts: [{ text: systemInstructions }] },
           generationConfig: { maxOutputTokens: MAX_OUTPUT_TOKENS },
         }),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),

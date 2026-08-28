@@ -67,7 +67,7 @@
    - **Evidence:** `docs/product/prd.md:78-86,122-130`; `docs/development/DEVELOPMENT_GUIDELINES.md:118-159`.
 
 12. **P3: Maintainability and delivery validation are incomplete.**
-   - **Verified fact:** `package.json:21-23` provides only `dev`; no test files exist; `lib/data.ts:1-3` and `lib/types.ts:1-3` are unused global pass-through exports despite the feature-local ownership rule.
+   - **Verified fact:** `package.json:21-23` provides only `dev`; no test files exist; ~~`lib/data.ts`~~ removed (was unused pass-through); `lib/types.ts:1-3` is an unused global pass-through export despite the feature-local ownership rule.
    - **Verified fact:** TypeScript strict checking passed with `node node_modules/typescript/bin/tsc --noEmit`.
    - **Why it matters:** The required production build, lint, and route verification cannot be run through project scripts; pass-through global exports create an unnecessary alternate ownership path.
    - **Evidence:** `docs/development/DEVELOPMENT_GUIDELINES.md:118-159,239-248`.

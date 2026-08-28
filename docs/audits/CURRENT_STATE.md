@@ -70,7 +70,7 @@ Projects has the clearest boundary. Home is mostly local. Route files compose fe
 
 ### Potential issues
 
-- `lib/data.ts` and `lib/types.ts` are pass-through feature exports with no observed consumers, creating an extra ownership path.
+- ~~`lib/data.ts`~~ removed (was a pass-through facade with no consumers). `lib/types.ts` is a pass-through feature export with no observed consumers, creating an extra ownership path.
 - `data/socialData.ts` imports profile data but exports nothing.
 - `lib/models/*` and `lib/mongodb.ts` are unused relative to static data and need intent/readiness review.
 - `FeaturedProjectsSection` is Projects-owned although the guideline classifies Home-specific featured presentation as Home-owned.
@@ -97,7 +97,7 @@ Projects has the clearest boundary. Home is mostly local. Route files compose fe
 - Keep `components/ui`, `components/layout`, and `lib/utils.ts` shared: they serve independent pages.
 - Keep Project data/retrieval/types local: they represent one domain.
 - Keep profile contact data local until another real domain owns portfolio settings.
-- `lib/data.ts`, `lib/types.ts`, and `data/socialData.ts` are **B. Potential improvements**, not confirmed violations.
+- ~~`lib/data.ts`~~ removed. `lib/types.ts` and `data/socialData.ts` are **B. Potential improvements**, not confirmed violations.
 - Admin-folder ownership is **C. Architectural preference** until the dashboard scope is implemented.
 
 ## 8. Documentation vs Implementation Gaps
