@@ -22,23 +22,27 @@ export async function POST(request: Request) {
     );
   }
 
-  const isValid = await validateAdminCredentials(email, password);
+  try {
+    const isValid = await validateAdminCredentials(email, password);
 
-  if (!isValid) {
-    return NextResponse.redirect(
-      new URL("/login?error=invalid", request.url),
+    if (!isValid) {
+      return NextResponse.redirect(
+        new URL("/login?error=invalid", request.url),
+        303,
+      );
+    }
+
+    const response = NextResponse.redirect(
+      new URL(destination, request.url),
       303,
     );
+    response.cookies.set(
+      SESSION_COOKIE_NAME,
+      createSession(email),
+      sessionCookie,
+    );
+    return response;
+  } catch {
+    return Response.json({ ok: false }, { status: 500 });
   }
-
-  const response = NextResponse.redirect(
-    new URL(destination, request.url),
-    303,
-  );
-  response.cookies.set(
-    SESSION_COOKIE_NAME,
-    createSession(email),
-    sessionCookie,
-  );
-  return response;
 }

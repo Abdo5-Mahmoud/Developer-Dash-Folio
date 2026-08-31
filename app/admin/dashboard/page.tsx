@@ -31,7 +31,7 @@ export default async function AdminDashboardPage() {
           Nothing here yet. Create a new project to add your first case study.
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-border rounded-lg border border-border bg-surface">
+        <ul className="flex flex-col divide-y rounded-lg border border-border bg-surface">
           {projects.map((project) => (
             <li key={project.id} className="flex items-center justify-between gap-4 px-4 py-3">
               <div className="min-w-0">

@@ -1,0 +1,9 @@
+
+{
+  "models": [{
+    "title": "DeepSeek",
+    "provider": "deepseek",
+    "model": "deepseek-chat",
+    "apiKey": "sk-51a6eba18a3b4da2983a6d475e4650ac"
+  }]
+}
