@@ -11,7 +11,13 @@ import type {
   ProjectStatus,
 } from "../types/project";
 
-function toProject(doc: ProjectDocument & { _id: Types.ObjectId; createdAt?: Date; updatedAt?: Date }): Project {
+function toProject(
+  doc: ProjectDocument & {
+    _id: Types.ObjectId;
+    createdAt?: Date;
+    updatedAt?: Date;
+  },
+): Project {
   return {
     id: doc._id.toString(),
     slug: doc.slug,
@@ -49,55 +55,111 @@ function toProject(doc: ProjectDocument & { _id: Types.ObjectId; createdAt?: Dat
   };
 }
 
-// ---------------- Public reads (published only) ----------------
+type ProjectCardDocument = {
+  slug: string;
+  title: string;
+  summary: string;
+  category?: string;
+  coverImage?: string;
+  coverImageAlt?: string;
+  techStack?: { name: string }[];
+  githubUrl?: string;
+  liveUrl?: string;
+  featured: boolean;
+};
 
-export async function getAllProjects(includeUnpublished = false): Promise<Project[]> {
-  await connectToDatabase();
-  const query = includeUnpublished ? {} : { status: "published" as const };
-  const docs = await ProjectModel.find(query)
-    .sort({ displayOrder: 1, createdAt: 1 })
-    .lean<ProjectDocument & { _id: Types.ObjectId; createdAt?: Date; updatedAt?: Date }[]>();
-  return docs.map((doc) => toProject(doc as ProjectDocument & { _id: Types.ObjectId; createdAt?: Date; updatedAt?: Date }));
+function mapProjectCardData(doc: ProjectCardDocument): ProjectCardData {
+  return {
+    slug: doc.slug,
+    title: doc.title,
+    summary: doc.summary,
+    category: doc.category ?? "Full Stack",
+    coverImage: doc.coverImage,
+    coverImageAlt: doc.coverImageAlt ?? `${doc.title} project cover image`,
+    tech: (doc.techStack ?? []).map((t) => t.name).filter(Boolean),
+    githubUrl: doc.githubUrl,
+    liveUrl: doc.liveUrl,
+    featured: doc.featured,
+  };
 }
 
+async function fetchProjectCardData(
+  featuredOnly = false,
+): Promise<ProjectCardData[]> {
+  await connectToDatabase();
+
+  const filter = featuredOnly
+    ? ({ status: "published" as const, featured: true } as const)
+    : ({ status: "published" as const } as const);
+
+  const docs = (await ProjectModel.find(filter, {
+    _id: 0,
+    slug: 1,
+    title: 1,
+    summary: 1,
+    category: 1,
+    coverImage: 1,
+    coverImageAlt: 1,
+    "techStack.name": 1,
+    githubUrl: 1,
+    liveUrl: 1,
+    featured: 1,
+    displayOrder: 1,
+    createdAt: 1,
+  })
+    .sort({ displayOrder: 1, createdAt: 1 })
+    .lean()) as ProjectCardDocument[];
+
+  return docs.map(mapProjectCardData);
+}
+
+// ---------------- Public reads (published only) ----------------
+
 export async function getAllProjectCardData(): Promise<ProjectCardData[]> {
-  const all = await getAllProjects();
-  return all.map((p) => ({
-    slug: p.slug,
-    title: p.title,
-    summary: p.summary,
-    category: p.category ?? "Full Stack",
-    coverImage: p.coverImage,
-    coverImageAlt: p.coverImageAlt ?? `${p.title} project cover image`,
-    tech: p.techStack.map((t) => t.name),
-    githubUrl: p.githubUrl,
-    liveUrl: p.liveUrl,
-    featured: p.featured,
-  }));
+  return fetchProjectCardData(false);
 }
 
 export async function getFeaturedProjects(): Promise<ProjectCardData[]> {
-  const all = await getAllProjects();
-  return all
-    .filter((p) => p.featured)
-    .map((p) => ({
-      slug: p.slug,
-      title: p.title,
-      summary: p.summary,
-      category: p.category ?? "Full Stack",
-      coverImage: p.coverImage,
-      coverImageAlt: p.coverImageAlt ?? `${p.title} project cover image`,
-      tech: p.techStack.map((t) => t.name),
-      githubUrl: p.githubUrl,
-      liveUrl: p.liveUrl,
-      featured: p.featured,
-    }));
+  return fetchProjectCardData(true);
+}
+
+// ---------------- Public reads (published only) ----------------
+
+export async function getAllProjects(
+  includeUnpublished = false,
+): Promise<Project[]> {
+  await connectToDatabase();
+  const query = includeUnpublished ? {} : { status: "published" as const };
+  const docs = (await ProjectModel.find(query)
+    .sort({ displayOrder: 1, createdAt: 1 })
+    .lean()) as Array<
+    ProjectDocument & {
+      _id: Types.ObjectId;
+      createdAt?: Date;
+      updatedAt?: Date;
+    }
+  >;
+  return docs.map((doc) =>
+    toProject(
+      doc as ProjectDocument & {
+        _id: Types.ObjectId;
+        createdAt?: Date;
+        updatedAt?: Date;
+      },
+    ),
+  );
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
   await connectToDatabase();
-  const doc = await ProjectModel.findOne({ slug, status: "published" })
-    .lean<ProjectDocument & { _id: Types.ObjectId; createdAt?: Date; updatedAt?: Date } | null>();
+  const doc = await ProjectModel.findOne({ slug, status: "published" }).lean<
+    | (ProjectDocument & {
+        _id: Types.ObjectId;
+        createdAt?: Date;
+        updatedAt?: Date;
+      })
+    | null
+  >();
   return doc ? toProject(doc) : null;
 }
 
@@ -110,8 +172,14 @@ export async function getAllProjectsAdmin(): Promise<Project[]> {
 export async function getProjectById(id: string): Promise<Project | null> {
   if (!isValidObjectId(id)) return null;
   await connectToDatabase();
-  const doc = await ProjectModel.findById(id)
-    .lean<ProjectDocument & { _id: Types.ObjectId; createdAt?: Date; updatedAt?: Date } | null>();
+  const doc = await ProjectModel.findById(id).lean<
+    | (ProjectDocument & {
+        _id: Types.ObjectId;
+        createdAt?: Date;
+        updatedAt?: Date;
+      })
+    | null
+  >();
   return doc ? toProject(doc) : null;
 }
 
@@ -142,13 +210,15 @@ function asString(value: unknown, cap: number): string | undefined {
 
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
-  return value.filter((v): v is string => typeof v === "string" && v.trim().length > 0).map((v) => v.trim());
+  return value
+    .filter((v): v is string => typeof v === "string" && v.trim().length > 0)
+    .map((v) => v.trim());
 }
 
 function cleanEntry<T extends Record<string, unknown>>(
   raw: unknown,
   required: string[],
-  optional: string[]
+  optional: string[],
 ): T | null {
   if (typeof raw !== "object" || raw === null) return null;
   const record = raw as Record<string, unknown>;
@@ -173,7 +243,7 @@ function cleanEntry<T extends Record<string, unknown>>(
 function cleanEntryList<T extends Record<string, unknown>>(
   raw: unknown,
   required: string[],
-  optional: string[] = []
+  optional: string[] = [],
 ): T[] {
   if (!Array.isArray(raw)) return [];
   return raw
@@ -196,26 +266,50 @@ export function parseProjectPayload(raw: unknown): ProjectInput | null {
   if (!title) return null;
 
   const summary = asString(record.summary, STRING_CAPS.summary);
-  const fullDescription = asString(record.fullDescription, STRING_CAPS.fullDescription);
+  const fullDescription = asString(
+    record.fullDescription,
+    STRING_CAPS.fullDescription,
+  );
   if (!summary || !fullDescription) return null;
 
   const techStack = Array.isArray(record.techStack)
     ? record.techStack
-        .map((item) => cleanEntry<{ technologyId: string; name: string }>(item, ["technologyId", "name"], []))
-        .filter((item): item is { technologyId: string; name: string } => item !== null)
+        .map((item) =>
+          cleanEntry<{ technologyId: string; name: string }>(
+            item,
+            ["technologyId", "name"],
+            [],
+          ),
+        )
+        .filter(
+          (item): item is { technologyId: string; name: string } =>
+            item !== null,
+        )
         .slice(0, 50)
     : [];
 
   const gallery = Array.isArray(record.gallery)
     ? record.gallery
-        .map((item) => cleanEntry<{ url: string; alt?: string; caption?: string }>(item, ["url"], ["alt", "caption"]))
-        .filter((item): item is { url: string; alt?: string; caption?: string } => item !== null)
+        .map((item) =>
+          cleanEntry<{ url: string; alt?: string; caption?: string }>(
+            item,
+            ["url"],
+            ["alt", "caption"],
+          ),
+        )
+        .filter(
+          (item): item is { url: string; alt?: string; caption?: string } =>
+            item !== null,
+        )
         .map((item) => ({ ...item, alt: item.alt ?? "" }))
         .slice(0, 50)
     : [];
 
   let displayOrder = 0;
-  if (typeof record.displayOrder === "number" && Number.isFinite(record.displayOrder)) {
+  if (
+    typeof record.displayOrder === "number" &&
+    Number.isFinite(record.displayOrder)
+  ) {
     displayOrder = Math.max(0, Math.min(9999, Math.trunc(record.displayOrder)));
   }
 
@@ -234,32 +328,50 @@ export function parseProjectPayload(raw: unknown): ProjectInput | null {
     liveUrl: asString(record.liveUrl, STRING_CAPS.liveUrl),
     techStack,
     skillIds: asStringArray(record.skillIds),
-    folderStructure: asString(record.folderStructure, STRING_CAPS.folderStructure),
-    architectureExplanation: asString(record.architectureExplanation, STRING_CAPS.architectureExplanation),
+    folderStructure: asString(
+      record.folderStructure,
+      STRING_CAPS.folderStructure,
+    ),
+    architectureExplanation: asString(
+      record.architectureExplanation,
+      STRING_CAPS.architectureExplanation,
+    ),
     dataFlow: asString(record.dataFlow, STRING_CAPS.dataFlow),
-    reactPatterns: cleanEntryList<{ name: string; rationale: string }>(record.reactPatterns, ["name", "rationale"]),
-    algorithms: cleanEntryList<{ name: string; rationale: string; complexity?: string }>(
-      record.algorithms,
+    reactPatterns: cleanEntryList<{ name: string; rationale: string }>(
+      record.reactPatterns,
       ["name", "rationale"],
-      ["complexity"]
     ),
-    performanceOptimizations: cleanEntryList<{ technique: string; impact?: string }>(
-      record.performanceOptimizations,
-      ["technique"],
-      ["impact"]
+    algorithms: cleanEntryList<{
+      name: string;
+      rationale: string;
+      complexity?: string;
+    }>(record.algorithms, ["name", "rationale"], ["complexity"]),
+    performanceOptimizations: cleanEntryList<{
+      technique: string;
+      impact?: string;
+    }>(record.performanceOptimizations, ["technique"], ["impact"]),
+    challenges: cleanEntryList<{ challenge: string; resolution: string }>(
+      record.challenges,
+      ["challenge", "resolution"],
     ),
-    challenges: cleanEntryList<{ challenge: string; resolution: string }>(record.challenges, ["challenge", "resolution"]),
     lessonsLearned: asString(record.lessonsLearned, STRING_CAPS.lessonsLearned),
-    aiPrompts: cleanEntryList<{ purpose: string; prompt: string }>(record.aiPrompts, ["purpose", "prompt"]),
-    aiMistakes: cleanEntryList<{ mistake: string; caughtBy: string; correction: string }>(record.aiMistakes, [
-      "mistake",
-      "caughtBy",
-      "correction",
-    ]),
-    engineeringDecisions: cleanEntryList<{ decision: string; alternatives?: string[]; rationale: string }>(
+    aiPrompts: cleanEntryList<{ purpose: string; prompt: string }>(
+      record.aiPrompts,
+      ["purpose", "prompt"],
+    ),
+    aiMistakes: cleanEntryList<{
+      mistake: string;
+      caughtBy: string;
+      correction: string;
+    }>(record.aiMistakes, ["mistake", "caughtBy", "correction"]),
+    engineeringDecisions: cleanEntryList<{
+      decision: string;
+      alternatives?: string[];
+      rationale: string;
+    }>(
       record.engineeringDecisions,
       ["decision", "rationale"],
-      ["alternatives"]
+      ["alternatives"],
     ).map((entry) => ({ ...entry, alternatives: entry.alternatives ?? [] })),
     featured: record.featured === true,
     displayOrder,
@@ -270,15 +382,20 @@ export function parseProjectPayload(raw: unknown): ProjectInput | null {
  * Publish-time rules. Drafts only need title/summary/fullDescription
  * (already enforced by parseProjectPayload).
  */
-export function validateProject(values: ProjectInput, status: "draft" | "published"): Record<string, string> {
+export function validateProject(
+  values: ProjectInput,
+  status: "draft" | "published",
+): Record<string, string> {
   const errors: Record<string, string> = {};
   if (status !== "published") return errors;
 
   if (!values.summary) errors.summary = "Summary is required to publish.";
-  if (values.techStack.length === 0) errors.techStack = "At least one technology is required to publish.";
+  if (values.techStack.length === 0)
+    errors.techStack = "At least one technology is required to publish.";
   for (const key of ["githubUrl", "liveUrl"] as const) {
     const url = values[key];
-    if (url && !/^https?:\/\//.test(url)) errors[key] = "Must start with http:// or https://";
+    if (url && !/^https?:\/\//.test(url))
+      errors[key] = "Must start with http:// or https://";
   }
   return errors;
 }
@@ -312,7 +429,10 @@ function revalidatePublicProjectPages(slug: string) {
 
 // ---------------- Mutations ----------------
 
-export async function createProject(values: ProjectInput, status: ProjectStatus): Promise<Project> {
+export async function createProject(
+  values: ProjectInput,
+  status: ProjectStatus,
+): Promise<Project> {
   await connectToDatabase();
   const slug = await uniqueSlug(values.slug || slugify(values.title));
   const doc = await ProjectModel.create({ ...values, slug, status });
@@ -320,7 +440,11 @@ export async function createProject(values: ProjectInput, status: ProjectStatus)
   return toProject(doc);
 }
 
-export async function updateProject(id: string, values: ProjectInput, status: ProjectStatus): Promise<Project | null> {
+export async function updateProject(
+  id: string,
+  values: ProjectInput,
+  status: ProjectStatus,
+): Promise<Project | null> {
   if (!isValidObjectId(id)) return null;
   await connectToDatabase();
   const existing = await ProjectModel.findById(id);

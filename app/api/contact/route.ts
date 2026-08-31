@@ -22,7 +22,7 @@ function parsePayload(raw: unknown): ContactFormValues | null {
   return values;
 }
 
-export async function POST(request: Request) {``
+export async function POST(request: Request) {
   let raw: unknown;
   try {
     raw = await request.json();
