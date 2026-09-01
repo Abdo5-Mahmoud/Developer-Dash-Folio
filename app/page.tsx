@@ -1,5 +1,5 @@
 import { getFeaturedProjects } from "@/features/projects/lib/projects";
-import { getAllTechnologies } from "@/features/home/lib/skills";
+import { getAllTechnologies } from "@/features/home/lib/technologies";
 import { Navbar } from "@/components/layout/navbar";
 import { Hero } from "@/features/home/components/hero";
 import { AboutSection } from "@/features/about/components/about-section";

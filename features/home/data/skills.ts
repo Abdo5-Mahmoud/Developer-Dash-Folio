@@ -1,4 +1,4 @@
-import type { Skill, SkillCategory, Technology } from "../types/skill";
+import type { SkillCategory } from "../types/skill";
 
 export const SKILL_CATEGORIES: SkillCategory[] = [
   {
@@ -79,43 +79,5 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
       { name: "Vercel" },
       { name: "Netlify" },
     ],
-  },
-];
-
-export const TECHNOLOGIES: Technology[] = [
-  { id: "t1", name: "Next.js", category: "Frontend" },
-  { id: "t2", name: "React", category: "Frontend" },
-  { id: "t3", name: "TypeScript", category: "Frontend" },
-  { id: "t4", name: "MongoDB", category: "Database" },
-  { id: "t5", name: "Tailwind CSS", category: "Frontend" },
-  { id: "t6", name: "Claude API", category: "AI Tooling" },
-  { id: "t7", name: "Node.js", category: "Backend" },
-  { id: "t8", name: "Docker", category: "DevOps" },
-  { id: "t9", name: "Recharts", category: "Frontend" },
-  { id: "t10", name: "TanStack Query", category: "Frontend" },
-  { id: "t11", name: "Socket.IO", category: "Backend" },
-  { id: "t12", name: "Express.js", category: "Backend" },
-  { id: "t13", name: "Zod", category: "Backend" },
-];
-
-export const SKILLS: Skill[] = [
-  {
-    id: "s1",
-    name: "System Design",
-    category: "Concept",
-    proficiency: "Proficient",
-  },
-  { id: "s2", name: "React", category: "Framework", proficiency: "Expert" },
-  {
-    id: "s3",
-    name: "AI-assisted development",
-    category: "Concept",
-    proficiency: "Expert",
-  },
-  {
-    id: "s4",
-    name: "Performance optimization",
-    category: "Concept",
-    proficiency: "Proficient",
   },
 ];

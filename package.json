@@ -23,6 +23,7 @@
     "dev": "next dev",
     "build": "next build",
     "test": "jest",
+    "seed:skills-technologies": "node scripts/seed-skills-technologies.mjs",
     "hash:admin-password": "node scripts/generate-admin-password-hash.mjs"
   },
   "devDependencies": {

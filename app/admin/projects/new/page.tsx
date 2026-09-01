@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { ProjectEditor } from "@/components/admin/project-editor";
 import type { ProjectInput } from "@/lib/types";
-import { getAllSkills, getAllTechnologyEntities } from "@/features/home/lib/skills";
+import { getAllSkills } from "@/features/home/lib/skills";
+import { getAllTechnologies } from "@/features/home/lib/technologies";
 
 export const metadata: Metadata = {
   title: "New Project - Admin",
@@ -41,7 +42,7 @@ function emptyProject(): ProjectInput {
 
 export default async function NewProjectPage() {
   const [technologies, skills] = await Promise.all([
-    getAllTechnologyEntities(),
+    getAllTechnologies(),
     getAllSkills(),
   ]);
 

@@ -1,6 +1,7 @@
 import { PROFILE_CONTACT } from "@/features/contact/data/contact";
 import { getAllProjects } from "@/features/projects/lib/projects";
-import { SKILL_CATEGORIES, TECHNOLOGIES } from "@/features/home/data/skills";
+import { getSkillCategories } from "@/features/home/lib/skills";
+import { getAllTechnologies } from "@/features/home/lib/technologies";
 import { ABOUT_HIGHLIGHTS } from "@/features/about/data/about";
 
 export interface ProjectKnowledge {
@@ -26,7 +27,11 @@ export interface PortfolioKnowledge {
 }
 
 export async function getPortfolioKnowledge(): Promise<PortfolioKnowledge> {
-  const projects = await getAllProjects();
+  const [projects, technologies, skillCategories] = await Promise.all([
+    getAllProjects(),
+    getAllTechnologies(),
+    getSkillCategories(),
+  ]);
 
   return {
     owner: {
@@ -39,11 +44,11 @@ export async function getPortfolioKnowledge(): Promise<PortfolioKnowledge> {
       githubUrl: PROFILE_CONTACT.githubUrl,
       linkedInUrl: PROFILE_CONTACT.linkedInUrl,
     },
-    skillCategories: SKILL_CATEGORIES.map((group) => ({
+    skillCategories: skillCategories.map((group) => ({
       category: group.category,
       skills: group.skills.map((skill) => skill.name),
     })),
-    technologies: TECHNOLOGIES.map((technology) => technology.name),
+    technologies: technologies.map((technology) => technology.name),
     projects: projects.map((project) => ({
       title: project.title,
       summary: project.summary,

@@ -22,3 +22,16 @@ export interface Technology {
   iconUrl?: string;
   officialUrl?: string;
 }
+
+export type SkillInput = {
+  name: string;
+  category: Skill["category"];
+  proficiency?: Skill["proficiency"];
+};
+
+export type TechnologyInput = {
+  name: string;
+  category: Technology["category"];
+  iconUrl?: string;
+  officialUrl?: string;
+};
