@@ -23,20 +23,11 @@ function toSkill(
 
 export async function getAllSkills(): Promise<Skill[]> {
   await connectToDatabase();
-  const docs = await SkillModel.find()
+  const docs = (await SkillModel.find()
     .collation({ locale: "en", strength: 2 })
     .sort({ name: 1 })
-    .lean<SkillDocument & { _id: Types.ObjectId }[]>();
+    .lean()) as (SkillDocument & { _id: Types.ObjectId })[];
   return docs.map(toSkill);
-}
-
-export async function getSkillById(id: string): Promise<Skill | null> {
-  if (!isValidObjectId(id)) return null;
-  await connectToDatabase();
-  const doc = await SkillModel.findById(id).lean<
-    (SkillDocument & { _id: Types.ObjectId }) | null
-  >();
-  return doc ? toSkill(doc) : null;
 }
 
 // Presentational grouping (display categories + "used in project" links)

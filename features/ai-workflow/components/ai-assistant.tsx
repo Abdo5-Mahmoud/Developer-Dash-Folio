@@ -56,6 +56,7 @@ export function AiAssistant() {
 
   const isLoading = status === "loading";
 
+  // for scrolling to the bottom of the chat when new messages are added
   useEffect(() => {
     const node = scrollRef.current;
     if (node) {
@@ -82,7 +83,6 @@ export function AiAssistant() {
 
     try {
       const response = await askPortfolioAssistant({ question: trimmed });
-      console.log(response);
       setMessages((current) => [
         ...current,
         {

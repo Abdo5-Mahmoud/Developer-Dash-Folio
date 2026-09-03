@@ -22,20 +22,17 @@ const EMPTY_VALUES: ContactFormValues = {
   email: "",
   subject: "",
   message: "",
+  company_url: "",
 };
 
 export function ContactForm() {
   const [values, setValues] = React.useState<ContactFormValues>(EMPTY_VALUES);
   const [fieldErrors, setFieldErrors] = React.useState<ContactFieldErrors>({});
-  const [status, setStatus] =
-    React.useState<ContactSubmissionStatus>("idle");
+  const [status, setStatus] = React.useState<ContactSubmissionStatus>("idle");
 
   const isSubmitting = status === "submitting";
 
-  function setField<K extends keyof ContactFormValues>(
-    key: K,
-    value: string,
-  ) {
+  function setField<K extends keyof ContactFormValues>(key: K, value: string) {
     setValues((current) => ({ ...current, [key]: value }));
     if (fieldErrors[key]) {
       setFieldErrors((current) => ({ ...current, [key]: undefined }));
@@ -84,6 +81,20 @@ export function ContactForm() {
           </Callout>
         </div>
       )}
+
+      <Input
+        id="contact-company_url"
+        name="company_url"
+        className="hidden"
+        style={{ display: "none" }}
+        aria-hidden="true"
+        autoComplete="off"
+        tabIndex={-1}
+        value={values.company_url}
+        onChange={(event) => setField("company_url", event.target.value)}
+        aria-invalid={Boolean(fieldErrors.company_url)}
+        aria-describedby={describedBy("company_url")}
+      />
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">

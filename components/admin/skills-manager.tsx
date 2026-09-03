@@ -146,6 +146,8 @@ export function SkillsManager({ initialSkills }: { initialSkills: Skill[] }) {
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="new-skill-category">Category</Label>
           <select
+            title="new Skill"
+            name="skill category"
             id="new-skill-category"
             className={selectClasses}
             value={newSkill.category}
@@ -166,6 +168,8 @@ export function SkillsManager({ initialSkills }: { initialSkills: Skill[] }) {
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="new-skill-proficiency">Proficiency</Label>
           <select
+            title="new Skill"
+            name="skill proficiency"
             id="new-skill-proficiency"
             className={selectClasses}
             value={newSkill.proficiency ?? ""}
@@ -186,7 +190,11 @@ export function SkillsManager({ initialSkills }: { initialSkills: Skill[] }) {
             ))}
           </select>
         </div>
-        <Button type="submit" loading={creating} disabled={!newSkill.name.trim()}>
+        <Button
+          type="submit"
+          loading={creating}
+          disabled={!newSkill.name.trim()}
+        >
           <Plus className="h-4 w-4" /> Add skill
         </Button>
       </form>
@@ -218,9 +226,13 @@ export function SkillsManager({ initialSkills }: { initialSkills: Skill[] }) {
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <Label htmlFor={`edit-category-${skill.id}`}>Category</Label>
+                    <Label htmlFor={`edit-category-${skill.id}`}>
+                      Category
+                    </Label>
                     <select
-                      id={`edit-category-${skill.id}`}
+                      name="Edit category"
+                      title="edit category"
+                      id={`edit-category-${skill.id}-${skill.name}`}
                       className={selectClasses}
                       value={draft.category}
                       onChange={(e) =>
@@ -242,6 +254,8 @@ export function SkillsManager({ initialSkills }: { initialSkills: Skill[] }) {
                       Proficiency
                     </Label>
                     <select
+                      name="Edit proficiency"
+                      title="edit proficiency"
                       id={`edit-proficiency-${skill.id}`}
                       className={selectClasses}
                       value={draft.proficiency ?? ""}
@@ -263,7 +277,9 @@ export function SkillsManager({ initialSkills }: { initialSkills: Skill[] }) {
                     </select>
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    <Button type="submit" loading={saving}>Save</Button>
+                    <Button type="submit" loading={saving}>
+                      Save
+                    </Button>
                     <Button
                       type="button"
                       variant="ghost"

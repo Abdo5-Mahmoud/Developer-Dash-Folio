@@ -22,7 +22,9 @@ const CATEGORIES = [
 const selectClasses =
   "flex h-9 rounded-md border border-border bg-surface px-3 text-sm text-foreground transition-colors duration-150 hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring focus-visible:border-accent disabled:cursor-not-allowed disabled:opacity-50";
 
-function emptyTechnology(category: TechnologyInput["category"]): TechnologyInput {
+function emptyTechnology(
+  category: TechnologyInput["category"],
+): TechnologyInput {
   return { name: "", category };
 }
 
@@ -165,6 +167,8 @@ export function TechnologiesManager({
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="new-technology-category">Category</Label>
           <select
+            name="newTechnology"
+            title="new Technology Category"
             id="new-technology-category"
             className={selectClasses}
             value={newTechnology.category}
@@ -247,13 +251,16 @@ export function TechnologiesManager({
                       Category
                     </Label>
                     <select
+                      name="editCategory"
+                      title="Edit Category"
                       id={`edit-category-${technology.id}`}
                       className={selectClasses}
                       value={draft.category}
                       onChange={(e) =>
                         setDraft({
                           ...draft,
-                          category: e.target.value as TechnologyInput["category"],
+                          category: e.target
+                            .value as TechnologyInput["category"],
                         })
                       }
                     >
@@ -265,7 +272,9 @@ export function TechnologiesManager({
                     </select>
                   </div>
                   <div className="flex min-w-48 flex-1 flex-col gap-1.5">
-                    <Label htmlFor={`edit-icon-${technology.id}`}>Icon URL</Label>
+                    <Label htmlFor={`edit-icon-${technology.id}`}>
+                      Icon URL
+                    </Label>
                     <Input
                       id={`edit-icon-${technology.id}`}
                       value={draft.iconUrl ?? ""}
@@ -287,7 +296,9 @@ export function TechnologiesManager({
                     />
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    <Button type="submit" loading={saving}>Save</Button>
+                    <Button type="submit" loading={saving}>
+                      Save
+                    </Button>
                     <Button
                       type="button"
                       variant="ghost"

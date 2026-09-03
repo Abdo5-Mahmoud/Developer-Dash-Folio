@@ -26,10 +26,10 @@ function toTechnology(
 
 export async function getAllTechnologies(): Promise<Technology[]> {
   await connectToDatabase();
-  const docs = await TechnologyModel.find()
+  const docs = (await TechnologyModel.find()
     .collation({ locale: "en", strength: 2 })
     .sort({ name: 1 })
-    .lean<TechnologyDocument & { _id: Types.ObjectId }[]>();
+    .lean()) as (TechnologyDocument & { _id: Types.ObjectId })[];
   return docs.map(toTechnology);
 }
 
@@ -144,8 +144,17 @@ export async function updateTechnology(
   if (await technologyNameTaken(values.name, id)) {
     return { ok: false, reason: "duplicate" };
   }
+  const previousName = existing.name;
   existing.set(values);
   const doc = await existing.save();
+  // PRD 7: propagate a rename to the denormalized name on referenced Projects.
+  if (previousName !== values.name) {
+    await ProjectModel.updateMany(
+      { "techStack.technologyId": id },
+      { $set: { "techStack.$[entry].name": values.name } },
+      { arrayFilters: [{ "entry.technologyId": id }] },
+    );
+  }
   revalidateTechnologyPages();
   return { ok: true, technology: toTechnology(doc) };
 }

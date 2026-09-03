@@ -1,5 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { isValidObjectId, Types } from "mongoose";
+import { cache } from "react";
 
 import { connectToDatabase } from "@/lib/mongodb";
 import { ProjectModel, type ProjectDocument } from "@/lib/models/project";
@@ -150,17 +151,44 @@ export async function getAllProjects(
   );
 }
 
-export async function getProjectBySlug(slug: string): Promise<Project | null> {
+export const getProjectBySlug = cache(
+  async (slug: string): Promise<Project | null> => {
+    await connectToDatabase();
+    const doc = await ProjectModel.findOne({ slug, status: "published" }).lean<
+      | (ProjectDocument & {
+          _id: Types.ObjectId;
+          createdAt?: Date;
+          updatedAt?: Date;
+        })
+      | null
+    >();
+    return doc ? toProject(doc) : null;
+  },
+);
+
+// ---------------- Knowledge digest (projected, used by AI assistant) ----------------
+
+export type ProjectKnowledgeDigest = {
+  title: string;
+  summary: string;
+  technologies: string[];
+};
+
+export async function getProjectKnowledgeDigests(): Promise<
+  ProjectKnowledgeDigest[]
+> {
   await connectToDatabase();
-  const doc = await ProjectModel.findOne({ slug, status: "published" }).lean<
-    | (ProjectDocument & {
-        _id: Types.ObjectId;
-        createdAt?: Date;
-        updatedAt?: Date;
-      })
-    | null
-  >();
-  return doc ? toProject(doc) : null;
+  const docs = (await ProjectModel.find(
+    { status: "published" as const },
+    { _id: 0, title: 1, summary: 1, "techStack.name": 1 },
+  )
+    .sort({ displayOrder: 1, createdAt: 1 })
+    .lean()) as Array<{ title: string; summary: string; techStack?: { name: string }[] }>;
+  return docs.map((doc) => ({
+    title: doc.title,
+    summary: doc.summary,
+    technologies: (doc.techStack ?? []).map((entry) => entry.name),
+  }));
 }
 
 // ---------------- Admin reads (drafts included) ----------------

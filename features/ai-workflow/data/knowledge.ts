@@ -1,5 +1,5 @@
 import { PROFILE_CONTACT } from "@/features/contact/data/contact";
-import { getAllProjects } from "@/features/projects/lib/projects";
+import { getProjectKnowledgeDigests } from "@/features/projects/lib/projects";
 import { getSkillCategories } from "@/features/home/lib/skills";
 import { getAllTechnologies } from "@/features/home/lib/technologies";
 import { ABOUT_HIGHLIGHTS } from "@/features/about/data/about";
@@ -28,7 +28,7 @@ export interface PortfolioKnowledge {
 
 export async function getPortfolioKnowledge(): Promise<PortfolioKnowledge> {
   const [projects, technologies, skillCategories] = await Promise.all([
-    getAllProjects(),
+    getProjectKnowledgeDigests(),
     getAllTechnologies(),
     getSkillCategories(),
   ]);
@@ -49,10 +49,6 @@ export async function getPortfolioKnowledge(): Promise<PortfolioKnowledge> {
       skills: group.skills.map((skill) => skill.name),
     })),
     technologies: technologies.map((technology) => technology.name),
-    projects: projects.map((project) => ({
-      title: project.title,
-      summary: project.summary,
-      technologies: project.techStack.map((entry) => entry.name),
-    })),
+    projects,
   };
 }

@@ -25,8 +25,11 @@ export default async function HomePage() {
               Working with
             </span>
             {tech.map((t) => (
-              <span key={t} className="font-mono text-sm text-foreground/80">
-                {t}
+              <span
+                key={t.id}
+                className="font-mono text-sm text-foreground/80"
+              >
+                {t.name}
               </span>
             ))}
           </div>

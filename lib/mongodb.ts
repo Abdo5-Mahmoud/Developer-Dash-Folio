@@ -14,7 +14,10 @@ declare global {
   var _mongooseCache: MongooseCache | undefined;
 }
 
-const cache: MongooseCache = global._mongooseCache ?? { conn: null, promise: null };
+const cache: MongooseCache = global._mongooseCache ?? {
+  conn: null,
+  promise: null,
+};
 global._mongooseCache = cache;
 
 export async function connectToDatabase() {
@@ -25,7 +28,10 @@ export async function connectToDatabase() {
   }
   if (cache.conn) return cache.conn;
   if (!cache.promise) {
-    cache.promise = mongoose.connect(MONGODB_URI as string);
+    cache.promise = mongoose.connect(MONGODB_URI as string).catch((e) => {
+      cache.promise = null;
+      throw e;
+    });
   }
   cache.conn = await cache.promise;
   return cache.conn;

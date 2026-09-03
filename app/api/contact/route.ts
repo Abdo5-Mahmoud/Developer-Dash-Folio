@@ -5,8 +5,11 @@ import {
   MESSAGE_MAX_LENGTH,
   validateContactForm,
 } from "@/features/contact/lib/submit-contact";
+import { sendTelegramNotification } from "@/lib/telegram";
+import { after } from "next/server";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limiter";
 
-const FIELDS = ["name", "email", "subject", "message"] as const;
+const FIELDS = ["name", "email", "subject", "message", "company_url"] as const;
 
 function parsePayload(raw: unknown): ContactFormValues | null {
   if (typeof raw !== "object" || raw === null) return null;
@@ -24,6 +27,20 @@ function parsePayload(raw: unknown): ContactFormValues | null {
 
 export async function POST(request: Request) {
   let raw: unknown;
+  const ip = getClientIp(request);
+
+  const { success } = checkRateLimit({
+    ip,
+    window: 10000,
+    keyPrefix: "contact",
+  });
+
+  if (!success) {
+    return Response.json(
+      { ok: false, error: "Too many requests. Please try again later." },
+      { status: 429 },
+    );
+  }
   try {
     raw = await request.json();
   } catch {
@@ -34,7 +51,9 @@ export async function POST(request: Request) {
   if (!values) {
     return Response.json({ ok: false }, { status: 400 });
   }
-
+  if (values.company_url) {
+    return Response.json({ ok: true });
+  }
   const errors = validateContactForm(values);
   if (Object.keys(errors).length > 0) {
     return Response.json({ ok: false }, { status: 422 });
@@ -43,6 +62,9 @@ export async function POST(request: Request) {
   try {
     await connectToDatabase();
     await ContactMessageModel.create(values);
+    after(async () => {
+      await sendTelegramNotification(values);
+    });
   } catch {
     return Response.json({ ok: false }, { status: 500 });
   }

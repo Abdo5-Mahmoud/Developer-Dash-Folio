@@ -7,8 +7,19 @@ import {
   sessionCookie,
   validateAdminCredentials,
 } from "@/lib/auth";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limiter";
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const { success } = checkRateLimit({ ip, keyPrefix: "login" });
+
+  if (!success) {
+    return Response.json(
+      { ok: false, error: "Too many requests. Please try again later." },
+      { status: 429 },
+    );
+  }
+
   const formData = await request.formData();
 
   const email = formData.get("email");

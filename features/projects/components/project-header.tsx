@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowLeft, ExternalLink, Github } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ProjectImage } from "./project-image";
 import type { Project } from "../types/project";
 
 export function ProjectHeader({ project }: { project: Project }) {
@@ -14,7 +14,7 @@ export function ProjectHeader({ project }: { project: Project }) {
           {/* Back link */}
           <div className="mb-6">
             <Link
-            href="/projects"
+              href="/projects"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -76,14 +76,15 @@ export function ProjectHeader({ project }: { project: Project }) {
 
       {project.coverImage && (
         <section className="mx-auto max-w-5xl px-6 pt-10">
-          <div className="relative aspect-video overflow-hidden rounded-xl border border-border bg-surface shadow-[var(--shadow-token-sm)] md:aspect-[21/9]">
-            <Image
+          <div className="relative aspect-video overflow-hidden rounded-xl border border-border bg-surface shadow-(--shadow-token-sm) md:aspect-21/9">
+            <ProjectImage
               src={project.coverImage}
-              alt={project.coverImageAlt ?? `${project.title} project cover image`}
-              fill
+              alt={
+                project.coverImageAlt ?? `${project.title} project cover image`
+              }
               sizes="(min-width: 1024px) 1024px, 100vw"
-              className="object-cover"
               priority
+              className="object-cover"
             />
           </div>
         </section>

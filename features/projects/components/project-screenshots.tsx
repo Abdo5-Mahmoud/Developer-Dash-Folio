@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import Image from "next/image";
+import { ProjectImage } from "./project-image";
 import type { Project } from "../types/project";
 
 export function ProjectScreenshots({ project }: { project: Project }) {
@@ -26,10 +26,9 @@ export function ProjectScreenshots({ project }: { project: Project }) {
           <figure key={image.url}>
             <Card className="overflow-hidden border border-border bg-surface">
               <div className="relative aspect-video">
-                <Image
+                <ProjectImage
                   src={image.url}
                   alt={image.alt}
-                  fill
                   sizes="(min-width: 640px) 50vw, 100vw"
                   className="object-cover"
                 />
