@@ -1,5 +1,6 @@
 import { getPortfolioKnowledge } from "@/features/ai-workflow/data/knowledge";
 import { MAX_QUESTION_LENGTH } from "@/features/ai-workflow/lib/assistant";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limiter";
 
 const GEMINI_API_KEY = process.env.Gemini_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
@@ -30,6 +31,15 @@ function extractAnswer(payload: GeminiPayload): string | null {
 
 export async function POST(request: Request) {
   let raw: unknown;
+
+  const ip = getClientIp(request);
+  const { success } = checkRateLimit({ ip, keyPrefix: "assistant", limit: 10 });
+  if (!success) {
+    return Response.json(
+      { ok: false, error: "Too many requests. Please try again later." },
+      { status: 429 },
+    );
+  }
   try {
     raw = await request.json();
   } catch {
