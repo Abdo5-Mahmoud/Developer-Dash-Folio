@@ -2,9 +2,16 @@ import { getPortfolioKnowledge } from "@/features/ai-workflow/data/knowledge";
 import { MAX_QUESTION_LENGTH } from "@/features/ai-workflow/lib/assistant";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limiter";
 
-const GEMINI_API_KEY = process.env.Gemini_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
+const DEFAULT_MODEL = "gemini-3.6-flash";
+const DEPRECATED_OR_INVALID_MODELS = new Set([
+  "gemini-pro",
+  "gemini-1.0-pro",
+  "gemini-1.5-flash",
+  "gemini-2.0-flash",
+]);
+
 const REQUEST_TIMEOUT_MS = 30_000;
+const KNOWLEDGE_TIMEOUT_MS = 10_000;
 const MAX_OUTPUT_TOKENS = 1000;
 
 interface GeminiPart {
@@ -17,6 +24,27 @@ interface GeminiContent {
 
 interface GeminiPayload {
   candidates?: Array<{ content?: GeminiContent }>;
+  error?: {
+    code?: number;
+    message?: string;
+    status?: string;
+  };
+}
+
+function getGeminiConfig() {
+  const apiKey =
+    process.env.GEMINI_API_KEY?.trim() ||
+    process.env.GOOGLE_API_KEY?.trim() ||
+    process.env.Gemini_API_KEY?.trim() ||
+    "";
+
+  const rawModel = process.env.GEMINI_MODEL?.trim();
+  const model =
+    rawModel && !DEPRECATED_OR_INVALID_MODELS.has(rawModel)
+      ? rawModel
+      : DEFAULT_MODEL;
+
+  return { apiKey, model };
 }
 
 function extractAnswer(payload: GeminiPayload): string | null {
@@ -40,10 +68,14 @@ export async function POST(request: Request) {
       { status: 429 },
     );
   }
+
   try {
     raw = await request.json();
   } catch {
-    return Response.json({ error: "Invalid request" }, { status: 400 });
+    return Response.json(
+      { ok: false, error: "Invalid JSON request body" },
+      { status: 400 },
+    );
   }
 
   const question =
@@ -56,18 +88,53 @@ export async function POST(request: Request) {
     question.trim().length === 0 ||
     question.trim().length > MAX_QUESTION_LENGTH
   ) {
-    return Response.json({ error: "Invalid request" }, { status: 400 });
+    return Response.json(
+      {
+        ok: false,
+        error: `Question is required and must be at most ${MAX_QUESTION_LENGTH} characters.`,
+      },
+      { status: 400 },
+    );
   }
 
-  if (!GEMINI_API_KEY) {
-    return Response.json({ error: "Assistant unavailable" }, { status: 500 });
+  const { apiKey, model } = getGeminiConfig();
+
+  if (!apiKey) {
+    console.error(
+      "[Assistant API] Missing Gemini API key. Please configure GEMINI_API_KEY or GOOGLE_API_KEY in .env.local.",
+    );
+    return Response.json(
+      {
+        ok: false,
+        error:
+          "Assistant unavailable: Missing API key. Please configure GEMINI_API_KEY in your .env.local file.",
+      },
+      { status: 500 },
+    );
   }
 
   let portfolioKnowledge;
   try {
-    portfolioKnowledge = await getPortfolioKnowledge();
-  } catch {
-    return Response.json({ error: "Assistant unavailable" }, { status: 500 });
+    portfolioKnowledge = await Promise.race([
+      getPortfolioKnowledge(),
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () =>
+            reject(new Error("Portfolio knowledge load timed out")),
+          KNOWLEDGE_TIMEOUT_MS,
+        ),
+      ),
+    ]);
+  } catch (error) {
+    console.error("[Assistant API] Failed to load portfolio knowledge:", error);
+    return Response.json(
+      {
+        ok: false,
+        error:
+          "Assistant unavailable: knowledge base temporarily unavailable. Please try again later.",
+      },
+      { status: 503 },
+    );
   }
 
   const systemInstructions = [
@@ -79,39 +146,89 @@ export async function POST(request: Request) {
     `KNOWLEDGE: ${JSON.stringify(portfolioKnowledge)}`,
   ].join("\n");
 
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
   let upstream: Response;
   try {
-    upstream = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: question.trim() }], role: "user" }],
-          systemInstruction: { parts: [{ text: systemInstructions }] },
-          generationConfig: { maxOutputTokens: MAX_OUTPUT_TOKENS },
-        }),
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-      },
+    upstream = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: question.trim() }], role: "user" }],
+        systemInstruction: { parts: [{ text: systemInstructions }] },
+        generationConfig: { maxOutputTokens: MAX_OUTPUT_TOKENS },
+      }),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+  } catch (error) {
+    console.error(
+      `[Assistant API] Network or timeout error connecting to Google Generative AI (${model}):`,
+      error,
     );
-  } catch {
-    return Response.json({ error: "Assistant unavailable" }, { status: 502 });
+    return Response.json(
+      {
+        ok: false,
+        error:
+          "Assistant service temporarily unavailable. Network timeout contacting AI provider.",
+      },
+      { status: 503 },
+    );
   }
-
   if (!upstream.ok) {
-    return Response.json({ error: "Assistant unavailable" }, { status: 502 });
+    const errorBody = await upstream
+      .text()
+      .catch(() => "Unable to read error text");
+    console.error(
+      `[Assistant API] Google Generative AI upstream error (Status ${upstream.status} ${upstream.statusText}) for model ${model}:`,
+      errorBody,
+    );
+    if (upstream.status === 429) {
+      return Response.json(
+        {
+          ok: false,
+          error:
+            "Assistant rate limit exceeded. Please try again later.",
+        },
+        { status: 429 },
+      );
+    }
+    return Response.json(
+      {
+        ok: false,
+        error: `Assistant upstream service error (${upstream.status}). Please check API key, model permissions, or quotas.`,
+      },
+      { status: upstream.status >= 500 ? 503 : 500 },
+    );
   }
 
   let payload: GeminiPayload;
   try {
     payload = (await upstream.json()) as GeminiPayload;
-  } catch {
-    return Response.json({ error: "Assistant unavailable" }, { status: 502 });
+  } catch (error) {
+    console.error(
+      "[Assistant API] Failed to parse upstream JSON payload:",
+      error,
+    );
+    return Response.json(
+      { ok: false, error: "Invalid response format received from AI service." },
+      { status: 502 },
+    );
   }
 
   const answer = extractAnswer(payload);
   if (!answer) {
-    return Response.json({ error: "Assistant unavailable" }, { status: 502 });
+    console.error(
+      "[Assistant API] No valid text candidate extracted from Google Generative AI payload:",
+      JSON.stringify(payload),
+    );
+    return Response.json(
+      {
+        ok: false,
+        error:
+          "The assistant could not generate a response from the available output.",
+      },
+      { status: 502 },
+    );
   }
 
   return Response.json({ answer });

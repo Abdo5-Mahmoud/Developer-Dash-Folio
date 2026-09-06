@@ -19,26 +19,26 @@
   },
   "agent": {
     "explore": {
-      "model": "bai/deepseek-v4-flash",
+      "model": "opencode/nemotron-3.5-lightning-free",
       "mode": "subagent",
       "description": "Fast agent specialized for exploring codebases.",
       "permission": { "edit": "deny" }
     },
     "general": {
-      "model": "bai/qwen3.8-flash",
+      "model": "opencode/big-pickle",
       "mode": "subagent",
       "description": "General-purpose agent for researching complex questions and executing multi-step tasks."
     },
     "review": {
-      "model": "bai/glm-5.3-flash",
+      "model": "opencode/muse-spark-1.3-contributor-free",
       "mode": "subagent",
       "description": "Read-only reviewer for second opinions and validation of delegated output.",
       "permission": { "edit": "deny" }
     },
     "deep": {
-      "model": "bai/deepseek-v4-flash-vision-exp",
+      "model": "opencode/nemotron-3-ultra-free",
       "mode": "subagent",
-      "description": "Deep-context agent (DeepSeek V4 Flash 16k) for tasks needing additional context capacity."
+      "description": "Deep-context agent (Nemotron 3 Ultra Free) for tasks needing additional context capacity."
     }
   },
   "model": "bai:gpt-5.5"

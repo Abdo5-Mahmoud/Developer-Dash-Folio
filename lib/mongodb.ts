@@ -28,10 +28,15 @@ export async function connectToDatabase() {
   }
   if (cache.conn) return cache.conn;
   if (!cache.promise) {
-    cache.promise = mongoose.connect(MONGODB_URI as string).catch((e) => {
-      cache.promise = null;
-      throw e;
-    });
+    // Fail fast when the database is down instead of hanging on the
+    // driver default (~30s server selection), which would stall every
+    // caller — including the assistant's knowledge load.
+    cache.promise = mongoose
+      .connect(MONGODB_URI as string, { serverSelectionTimeoutMS: 8000 })
+      .catch((e) => {
+        cache.promise = null;
+        throw e;
+      });
   }
   cache.conn = await cache.promise;
   return cache.conn;

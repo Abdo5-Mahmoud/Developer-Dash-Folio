@@ -20,7 +20,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const formData = await request.formData();
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return NextResponse.redirect(
+      new URL("/login?error=invalid", request.url),
+      303,
+    );
+  }
 
   const email = formData.get("email");
   const password = formData.get("password");

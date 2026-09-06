@@ -104,7 +104,7 @@ export function AiAssistant() {
 
   return (
     <section
-      aria-labelledby="ai-assistant-heading "
+      aria-labelledby="ai-assistant-heading"
       className="flex overflow-hidden flex-col flex-1 gap-4 px-6 py-10 mx-auto w-full max-w-3xl min-h-0"
     >
       <h2 id="ai-assistant-heading" className="sr-only">
@@ -113,7 +113,7 @@ export function AiAssistant() {
 
       <div
         ref={scrollRef}
-        className="overflow-y-scroll overscroll-contain flex-1 max-h-64 min-h-96"
+        className="overflow-y-scroll overscroll-contain flex-1 h-96"
       >
         <div
           role="log"

@@ -1,3 +1,9 @@
+// Escape Telegram MarkdownV1 metacharacters in user-controlled input so a
+// name/message containing *_[]`() never breaks formatting or the send.
+function escapeTelegramMarkdown(value: string): string {
+  return value.replace(/([_*\[\]()~`>#+\-=|{}.!])/g, "\\$1");
+}
+
 export async function sendTelegramNotification({
   name,
   email,
@@ -18,8 +24,8 @@ export async function sendTelegramNotification({
   }
 
   try {
-    const text = `📬 *New Message on Devfolio!*\n\n*From:* ${name}\n*Email:* ${email}\n\n*Subject:*\n${subject}\n\n*Message:*\n${message}`;
-    fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const text = `📬 *New Message on Devfolio!*\n\n*From:* ${escapeTelegramMarkdown(name)}\n*Email:* ${escapeTelegramMarkdown(email)}\n\n*Subject:*\n${escapeTelegramMarkdown(subject)}\n\n*Message:*\n${escapeTelegramMarkdown(message)}`;
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -29,6 +35,6 @@ export async function sendTelegramNotification({
       }),
     });
   } catch (err) {
-    console.log("Telegram notification failed:", err);
+    console.error("Telegram notification failed:", err);
   }
 }
