@@ -1,5 +1,10 @@
 import { getPortfolioKnowledge } from "@/features/ai-workflow/data/knowledge";
 import { MAX_QUESTION_LENGTH } from "@/features/ai-workflow/lib/assistant";
+import {
+  createLLMProvider,
+  GeminiProviderStrategy,
+  handleAssistatntRequest,
+} from "@/features/ai-workflow/lib/llm";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limiter";
 
 const DEFAULT_MODEL = "gemini-3.6-flash";
@@ -119,8 +124,7 @@ export async function POST(request: Request) {
       getPortfolioKnowledge(),
       new Promise<never>((_, reject) =>
         setTimeout(
-          () =>
-            reject(new Error("Portfolio knowledge load timed out")),
+          () => reject(new Error("Portfolio knowledge load timed out")),
           KNOWLEDGE_TIMEOUT_MS,
         ),
       ),
@@ -145,91 +149,98 @@ export async function POST(request: Request) {
     "",
     `KNOWLEDGE: ${JSON.stringify(portfolioKnowledge)}`,
   ].join("\n");
+  const geminiProvider = createLLMProvider(apiKey);
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  // const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-  let upstream: Response;
-  try {
-    upstream = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: question.trim() }], role: "user" }],
-        systemInstruction: { parts: [{ text: systemInstructions }] },
-        generationConfig: { maxOutputTokens: MAX_OUTPUT_TOKENS },
-      }),
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
-  } catch (error) {
-    console.error(
-      `[Assistant API] Network or timeout error connecting to Google Generative AI (${model}):`,
-      error,
-    );
-    return Response.json(
-      {
-        ok: false,
-        error:
-          "Assistant service temporarily unavailable. Network timeout contacting AI provider.",
-      },
-      { status: 503 },
-    );
-  }
-  if (!upstream.ok) {
-    const errorBody = await upstream
-      .text()
-      .catch(() => "Unable to read error text");
-    console.error(
-      `[Assistant API] Google Generative AI upstream error (Status ${upstream.status} ${upstream.statusText}) for model ${model}:`,
-      errorBody,
-    );
-    if (upstream.status === 429) {
-      return Response.json(
-        {
-          ok: false,
-          error:
-            "Assistant rate limit exceeded. Please try again later.",
-        },
-        { status: 429 },
-      );
-    }
-    return Response.json(
-      {
-        ok: false,
-        error: `Assistant upstream service error (${upstream.status}). Please check API key, model permissions, or quotas.`,
-      },
-      { status: upstream.status >= 500 ? 503 : 500 },
-    );
-  }
+  // let upstream: Response = await geminiProvider.generateProviderResponse({
+  //   prompt: question,
+  //   systemInstructions: systemInstructions,
+  // });
+  // // try {
+  // //   upstream = await fetch(endpoint, {
+  // //     method: "POST",
+  // //     headers: { "Content-Type": "application/json" },
+  // //     body: JSON.stringify({
+  // //       contents: [{ parts: [{ text: question.trim() }], role: "user" }],
+  // //       systemInstruction: { parts: [{ text: systemInstructions }] },
+  // //       generationConfig: { maxOutputTokens: MAX_OUTPUT_TOKENS },
+  // //     }),
+  // //     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  // //   });
+  // // } catch (error) {
+  // //   console.error(
+  // //     `[Assistant API] Network or timeout error connecting to Google Generative AI (${model}):`,
+  // //     error,
+  // //   );
+  // //   return Response.json(
+  // //     {
+  // //       ok: false,
+  // //       error:
+  // //         "Assistant service temporarily unavailable. Network timeout contacting AI provider.",
+  // //     },
+  // //     { status: 503 },
+  // //   );
+  // // }
+  // // if (!upstream.ok) {
+  // //   const errorBody = await upstream
+  // //     .text()
+  // //     .catch(() => "Unable to read error text");
+  // //   console.error(
+  // //     `[Assistant API] Google Generative AI upstream error (Status ${upstream.status} ${upstream.statusText}) for model ${model}:`,
+  // //     errorBody,
+  // //   );
+  // //   if (upstream.status === 429) {
+  // //     return Response.json(
+  // //       {
+  // //         ok: false,
+  // //         error: "Assistant rate limit exceeded. Please try again later.",
+  // //       },
+  // //       { status: 429 },
+  // //     );
+  // //   }
+  // //   return Response.json(
+  // //     {
+  // //       ok: false,
+  // //       error: `Assistant upstream service error (${upstream.status}). Please check API key, model permissions, or quotas.`,
+  // //     },
+  // //     { status: upstream.status >= 500 ? 503 : 500 },
+  // //   );
+  // // }
 
-  let payload: GeminiPayload;
-  try {
-    payload = (await upstream.json()) as GeminiPayload;
-  } catch (error) {
-    console.error(
-      "[Assistant API] Failed to parse upstream JSON payload:",
-      error,
-    );
-    return Response.json(
-      { ok: false, error: "Invalid response format received from AI service." },
-      { status: 502 },
-    );
-  }
+  // let payload: GeminiPayload;
+  // try {
+  //   payload = (await upstream.json()) as GeminiPayload;
+  // } catch (error) {
+  //   console.error(
+  //     "[Assistant API] Failed to parse upstream JSON payload:",
+  //     error,
+  //   );
+  //   return Response.json(
+  //     { ok: false, error: "Invalid response format received from AI service." },
+  //     { status: 502 },
+  //   );
+  // }
 
-  const answer = extractAnswer(payload);
-  if (!answer) {
-    console.error(
-      "[Assistant API] No valid text candidate extracted from Google Generative AI payload:",
-      JSON.stringify(payload),
-    );
-    return Response.json(
-      {
-        ok: false,
-        error:
-          "The assistant could not generate a response from the available output.",
-      },
-      { status: 502 },
-    );
-  }
-
+  // const answer = extractAnswer(payload);
+  // if (!answer) {
+  //   console.error(
+  //     "[Assistant API] No valid text candidate extracted from Google Generative AI payload:",
+  //     JSON.stringify(payload),
+  //   );
+  //   return Response.json(
+  //     {
+  //       ok: false,
+  //       error:
+  //         "The assistant could not generate a response from the available output.",
+  //     },
+  //     { status: 502 },
+  //   );
+  // }
+  const answer: string = await handleAssistatntRequest({
+    prompt: question,
+    provider: geminiProvider,
+    systemInstructions: systemInstructions,
+  });
   return Response.json({ answer });
 }
