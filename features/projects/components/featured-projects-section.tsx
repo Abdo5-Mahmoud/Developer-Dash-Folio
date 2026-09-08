@@ -81,7 +81,7 @@ export function FeaturedProjectsSection({
             <Button asChild variant="outline" size="sm" className="w-fit">
               <Link href="/projects" className="group">
                 View all projects
-                <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform duration-150 group-hover:translate-x-0.5 motion-reduce:transform-none" />
+                <ArrowRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-150 group-hover:translate-x-0.5 motion-reduce:transform-none" />
               </Link>
             </Button>
           </motion.div>

@@ -32,6 +32,7 @@ export function ContactChannels({ channels }: { channels: ContactChannel[] }) {
                 aria-label={
                   external ? `Open ${label} in a new tab` : label
                 }
+                className="flex w-full items-center gap-3"
               >
                 <Icon className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
                 <span className="flex min-w-0 flex-col items-start gap-0.5">

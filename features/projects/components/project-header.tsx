@@ -15,9 +15,9 @@ export function ProjectHeader({ project }: { project: Project }) {
           <div className="mb-6">
             <Link
               href="/projects"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
+              className="inline-flex items-center gap-1.5 rounded text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
               Back to projects
             </Link>
           </div>
@@ -52,7 +52,7 @@ export function ProjectHeader({ project }: { project: Project }) {
                   aria-label={`Open live demo for ${project.title}`}
                 >
                   Live Demo
-                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                  <ExternalLink className="h-4 w-4 shrink-0" aria-hidden="true" />
                 </a>
               </Button>
             )}
@@ -65,7 +65,7 @@ export function ProjectHeader({ project }: { project: Project }) {
                   rel="noreferrer"
                   aria-label={`View ${project.title} source code on GitHub`}
                 >
-                  <Github className="h-4 w-4" aria-hidden="true" />
+                  <Github className="h-4 w-4 shrink-0" aria-hidden="true" />
                   Source Code
                 </a>
               </Button>

@@ -33,13 +33,13 @@ export default function NotFound() {
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Button asChild className="w-full sm:w-auto">
               <Link href="/projects">
-                <Briefcase className="mr-2 h-4 w-4" aria-hidden="true" />
+                <Briefcase className="h-4 w-4 shrink-0" aria-hidden="true" />
                 Browse Projects
               </Link>
             </Button>
             <Button asChild variant="outline" className="w-full sm:w-auto">
               <Link href="/">
-                <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
+                <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
                 Back to Home
               </Link>
             </Button>

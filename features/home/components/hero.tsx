@@ -55,8 +55,8 @@ export function Hero() {
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Button asChild size="lg">
             <Link href="/projects">
-              Explore Projects{" "}
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              Explore Projects
+              <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
             </Link>
           </Button>
           <Button asChild size="lg" variant="secondary">
@@ -72,7 +72,7 @@ export function Hero() {
                   rel="noreferrer"
                   aria-label={label}
                 >
-                  <Icon className="h-4 w-4" aria-hidden="true" />
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                 </a>
               </Button>
             ))}

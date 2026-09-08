@@ -40,7 +40,7 @@ export function AdminSidebar() {
                   : "text-muted-foreground hover:bg-surface-hover hover:text-foreground",
               )}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className="h-4 w-4 shrink-0" />
               {l.label}
             </Link>
           );
@@ -52,7 +52,7 @@ export function AdminSidebar() {
             className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-surface-hover hover:text-foreground"
             type="submit"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-4 w-4 shrink-0" />
             Sign out
           </button>
         </form>

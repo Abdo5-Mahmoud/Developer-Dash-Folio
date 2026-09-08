@@ -44,12 +44,12 @@ export default function RootError({
 
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Button onClick={() => reset()} className="w-full sm:w-auto">
-              <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />
+              <RotateCcw className="h-4 w-4 shrink-0" aria-hidden="true" />
               Try again
             </Button>
             <Button asChild variant="outline" className="w-full sm:w-auto">
               <Link href="/">
-                <Home className="mr-2 h-4 w-4" aria-hidden="true" />
+                <Home className="h-4 w-4 shrink-0" aria-hidden="true" />
                 Return Home
               </Link>
             </Button>

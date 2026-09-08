@@ -27,25 +27,16 @@ export class MockProviderStrategy implements LLMProviderStrategy {
     return `Mock response for prompt: "${prompt}"`;
   }
 }
-
-export class GeminiProviderStrategy implements LLMProviderStrategy {
+class GeminiClient {
   readonly providerName: string = "gemini-3.6-flash";
-
-  constructor(private apiKey: string) {
-    if (!apiKey) {
-      throw new LLMError(401, this.providerName, "API key is required");
-    }
-  }
-  async generateProviderResponse({
+  constructor(private apiKey: string) {}
+  async generateContent({
     prompt,
     systemInstructions,
   }: {
     prompt: string;
     systemInstructions: string;
-  }): Promise<string> {
-    if (prompt.includes("rate-limit")) {
-      throw new LLMError(429, this.providerName, "Rate limit exceeded");
-    }
+  }): Promise<GeminiPayload> {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${this.providerName}:generateContent?key=${this.apiKey}`;
 
     let upstream: Response;
@@ -83,7 +74,30 @@ export class GeminiProviderStrategy implements LLMProviderStrategy {
         `Upstream error: ${errorBody}`,
       );
     }
-    const payload: GeminiPayload = (await upstream.json()) as GeminiPayload;
+    return (await upstream.json()) as GeminiPayload;
+  }
+}
+
+export class GeminiProviderStrategy implements LLMProviderStrategy {
+  readonly providerName: string = "gemini-3.6-flash";
+
+  constructor(private apiKey: string) {
+    if (!apiKey) {
+      throw new LLMError(401, this.providerName, "API key is required");
+    }
+  }
+  async generateProviderResponse({
+    prompt,
+    systemInstructions,
+  }: {
+    prompt: string;
+    systemInstructions: string;
+  }): Promise<string> {
+    const geminiClient = new GeminiClient(this.apiKey);
+    const payload: GeminiPayload = await geminiClient.generateContent({
+      prompt,
+      systemInstructions,
+    });
     const answer = extractAnswer(payload);
     if (!answer) {
       console.error(
@@ -127,8 +141,17 @@ export async function handleAssistatntRequest({
   provider: LLMProviderStrategy;
   systemInstructions: string;
 }): Promise<string> {
-  return await provider.generateProviderResponse({
-    prompt,
-    systemInstructions,
-  });
+  return await provider
+    .generateProviderResponse({
+      prompt,
+      systemInstructions,
+    })
+    .catch((error) => {
+      if (error instanceof LLMError) {
+        console.error(
+          `[Assistant API] LLMError from provider ${error.providerName}: ${error.message}`,
+        );
+      }
+      throw error;
+    });
 }

@@ -216,7 +216,7 @@ export function TechnologiesManager({
           loading={creating}
           disabled={!newTechnology.name.trim()}
         >
-          <Plus className="h-4 w-4" /> Add technology
+          <Plus className="h-4 w-4 shrink-0" /> Add technology
         </Button>
       </form>
 
@@ -340,7 +340,7 @@ export function TechnologiesManager({
                     aria-label={`Edit ${technology.name}`}
                     onClick={() => startEdit(technology)}
                   >
-                    <Pencil className="h-4 w-4" />
+                    <Pencil className="h-4 w-4 shrink-0" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -349,7 +349,7 @@ export function TechnologiesManager({
                     loading={deletingId === technology.id}
                     onClick={() => void handleDelete(technology)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4 shrink-0" />
                   </Button>
                 </div>
               </li>

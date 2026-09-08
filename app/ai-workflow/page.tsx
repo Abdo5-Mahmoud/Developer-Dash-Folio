@@ -119,7 +119,7 @@ export default function AiWorkflowPage() {
               className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
             >
               <Link href="/">
-                <ArrowLeft className="size-3.5" />
+                <ArrowLeft className="size-3.5 shrink-0" />
                 Back to Home
               </Link>
             </Button>
@@ -131,7 +131,7 @@ export default function AiWorkflowPage() {
           <div className="mx-auto max-w-5xl space-y-6">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="default" className="gap-1.5 font-mono text-xs">
-                <ShieldCheck className="size-3.5" />
+                <ShieldCheck className="size-3.5 shrink-0" />
                 Zero-Trust Engineering
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
@@ -170,7 +170,7 @@ export default function AiWorkflowPage() {
             <div className="grid grid-cols-2 gap-3 pt-4 sm:grid-cols-4 sm:gap-4">
               <div className="rounded-lg border border-border bg-surface p-4">
                 <div className="flex items-center gap-2 text-accent">
-                  <Terminal className="size-4" />
+                  <Terminal className="size-4 shrink-0" />
                   <span className="font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Philosophy
                   </span>
@@ -185,7 +185,7 @@ export default function AiWorkflowPage() {
 
               <div className="rounded-lg border border-border bg-surface p-4">
                 <div className="flex items-center gap-2 text-success">
-                  <ShieldCheck className="size-4" />
+                  <ShieldCheck className="size-4 shrink-0" />
                   <span className="font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Auditing
                   </span>
@@ -200,7 +200,7 @@ export default function AiWorkflowPage() {
 
               <div className="rounded-lg border border-border bg-surface p-4">
                 <div className="flex items-center gap-2 text-warning">
-                  <Cpu className="size-4" />
+                  <Cpu className="size-4 shrink-0" />
                   <span className="font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Runtime
                   </span>
@@ -215,7 +215,7 @@ export default function AiWorkflowPage() {
 
               <div className="rounded-lg border border-border bg-surface p-4">
                 <div className="flex items-center gap-2 text-accent">
-                  <Lock className="size-4" />
+                  <Lock className="size-4 shrink-0" />
                   <span className="font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Hardening
                   </span>
@@ -239,7 +239,7 @@ export default function AiWorkflowPage() {
           >
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-accent">
-                <Workflow className="size-4" />
+                <Workflow className="size-4 shrink-0" />
                 <span className="font-mono text-xs font-medium uppercase tracking-wider">
                   Engineering Philosophy
                 </span>
@@ -285,7 +285,7 @@ export default function AiWorkflowPage() {
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <div className="rounded-lg border border-danger/30 bg-danger-muted/20 p-5">
                 <div className="flex items-center gap-2 text-danger">
-                  <AlertTriangle className="size-4" />
+                  <AlertTriangle className="size-4 shrink-0" />
                   <h3 className="font-semibold text-foreground">
                     The Naive "Autopilot" Mindset
                   </h3>
@@ -324,7 +324,7 @@ export default function AiWorkflowPage() {
 
               <div className="rounded-lg border border-success/30 bg-success-muted/20 p-5">
                 <div className="flex items-center gap-2 text-success">
-                  <CheckCircle2 className="size-4" />
+                  <CheckCircle2 className="size-4 shrink-0" />
                   <h3 className="font-semibold text-foreground">
                     The Zero-Trust "Co-Pilot" Protocol
                   </h3>
@@ -369,7 +369,7 @@ export default function AiWorkflowPage() {
           <section className="space-y-8" aria-labelledby="four-pillars-heading">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-accent">
-                <GitPullRequest className="size-4" />
+                <GitPullRequest className="size-4 shrink-0" />
                 <span className="font-mono text-xs font-medium uppercase tracking-wider">
                   Methodology
                 </span>
@@ -400,7 +400,7 @@ export default function AiWorkflowPage() {
                           {pillar.step} // {pillar.subtitle}
                         </span>
                         <div className="flex size-8 items-center justify-center rounded-md bg-accent-muted text-accent">
-                          <IconComponent className="size-4" />
+                          <IconComponent className="size-4 shrink-0" />
                         </div>
                       </div>
                       <CardTitle className="text-lg">{pillar.title}</CardTitle>
@@ -433,7 +433,7 @@ export default function AiWorkflowPage() {
           >
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-accent">
-                <Flame className="size-4" />
+                <Flame className="size-4 shrink-0" />
                 <span className="font-mono text-xs font-medium uppercase tracking-wider">
                   Verified Evidence
                 </span>
@@ -695,7 +695,7 @@ if (values.company_url) {
           >
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-accent">
-                <Sparkles className="size-4" />
+                <Sparkles className="size-4 shrink-0" />
                 <span className="font-mono text-xs font-medium uppercase tracking-wider">
                   Live System Demo
                 </span>

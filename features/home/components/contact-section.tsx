@@ -83,6 +83,7 @@ export function ContactSection() {
                     target={external ? "_blank" : undefined}
                     rel={external ? "noreferrer" : undefined}
                     aria-label={external ? `Open ${label} profile` : `Send an email to ${PROFILE_CONTACT.email}`}
+                    className="flex w-full items-center gap-3"
                   >
                     <Icon className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
                     <span className="flex min-w-0 flex-col items-start gap-0.5">

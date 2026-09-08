@@ -71,7 +71,7 @@ export function ProjectTechStack({ project }: { project: Project }) {
                     aria-label={`Open live demo for ${project.title}`}
                   >
                     Live Demo
-                    <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                    <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                   </a>
                 </Button>
               )}
@@ -90,7 +90,7 @@ export function ProjectTechStack({ project }: { project: Project }) {
                     aria-label={`View ${project.title} repository on GitHub`}
                   >
                     GitHub Repository
-                    <Github className="h-3.5 w-3.5" aria-hidden="true" />
+                    <Github className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                   </a>
                 </Button>
               )}
@@ -114,7 +114,7 @@ export function ProjectTechStack({ project }: { project: Project }) {
           className="w-full justify-start text-muted-foreground hover:text-foreground"
         >
           <Link href="/projects">
-            <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
+            <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
             Back to All Projects
           </Link>
         </Button>

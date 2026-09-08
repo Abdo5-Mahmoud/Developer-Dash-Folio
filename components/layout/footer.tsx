@@ -3,10 +3,10 @@ import { SOCIAL_LINKS } from "@/features/contact/data/contact";
 
 const FOOTER_NAVIGATION = [
   { href: "/", label: "Home" },
-  { href: "/#about", label: "About" },
-  { href: "/#skills", label: "Skills" },
   { href: "/projects", label: "Projects" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/ai-workflow", label: "AI Workflow" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function Footer() {
@@ -17,7 +17,7 @@ export function Footer() {
           <div className="max-w-xs">
             <Link
               href="/"
-              className="font-mono text-sm font-medium text-foreground transition-colors hover:text-accent focus-visible:outline-none focus-visible:underline"
+              className="font-mono text-sm font-medium text-foreground transition-colors hover:text-accent"
             >
               devfolio<span className="text-muted-foreground">.ai</span>
             </Link>
@@ -33,7 +33,7 @@ export function Footer() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
+                      className="rounded px-1.5 py-0.5 text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {item.label}
                     </Link>

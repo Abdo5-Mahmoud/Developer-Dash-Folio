@@ -46,7 +46,7 @@ export function Breadcrumbs({
               )}
               {!isLast && (
                 <ChevronRight
-                  className="size-3.5 text-muted-foreground/50"
+                  className="size-3.5 shrink-0 text-muted-foreground/50"
                   aria-hidden
                 />
               )}

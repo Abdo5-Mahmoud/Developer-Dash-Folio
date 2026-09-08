@@ -83,7 +83,7 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
           >
             <Link href={`/projects/${project.slug}`}>
               View Details
-              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-150 group-hover:translate-x-0.5 motion-reduce:transform-none" />
+              <ArrowRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-150 group-hover:translate-x-0.5 motion-reduce:transform-none" />
             </Link>
           </Button>
 
@@ -101,7 +101,7 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
                   rel="noreferrer"
                   aria-label={`View ${project.title} source code on GitHub`}
                 >
-                  <Github className="h-4 w-4" aria-hidden="true" />
+                  <Github className="h-4 w-4 shrink-0" aria-hidden="true" />
                 </a>
               </Button>
             )}
@@ -119,7 +119,7 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
                   rel="noreferrer"
                   aria-label={`Open live demo of ${project.title}`}
                 >
-                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                  <ExternalLink className="h-4 w-4 shrink-0" aria-hidden="true" />
                 </a>
               </Button>
             )}

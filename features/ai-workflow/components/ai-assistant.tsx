@@ -61,7 +61,7 @@ export function AiAssistant() {
     const node = scrollRef.current;
     if (node) {
       node.scrollTo({
-        top: scrollRef.current?.scrollHeight,
+        top: node.scrollHeight,
         behavior: shouldReduceMotion ? "auto" : "smooth",
       });
     }
@@ -113,7 +113,7 @@ export function AiAssistant() {
 
       <div
         ref={scrollRef}
-        className="overflow-y-scroll overscroll-contain flex-1 h-96"
+        className="overflow-y-auto overscroll-contain flex-1 max-h-96"
       >
         <div
           role="log"
@@ -155,7 +155,11 @@ export function AiAssistant() {
                 {[0, 1, 2].map((dot) => (
                   <span
                     key={dot}
-                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground motion-reduce:animate-none"
+                    className="h-1.5 w-1.5 rounded-full bg-muted-foreground/80 animate-pulse motion-reduce:animate-none"
+                    style={{
+                      animationDelay: `${dot * 160}ms`,
+                      animationDuration: "1s",
+                    }}
                   />
                 ))}
               </div>

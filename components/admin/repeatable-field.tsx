@@ -44,7 +44,7 @@ export function RepeatableField<T>({
             onClick={() => remove(i)}
             aria-label="Remove entry"
           >
-            <Trash2 className="h-4 w-4 text-muted-foreground" />
+            <Trash2 className="h-4 w-4 shrink-0 text-muted-foreground" />
           </Button>
         </div>
       ))}
@@ -55,7 +55,7 @@ export function RepeatableField<T>({
         className="w-fit"
         onClick={() => onChange([...items, emptyItem])}
       >
-        <Plus className="h-4 w-4" /> {addLabel}
+        <Plus className="h-4 w-4 shrink-0" /> {addLabel}
       </Button>
     </div>
   );

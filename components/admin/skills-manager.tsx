@@ -195,7 +195,7 @@ export function SkillsManager({ initialSkills }: { initialSkills: Skill[] }) {
           loading={creating}
           disabled={!newSkill.name.trim()}
         >
-          <Plus className="h-4 w-4" /> Add skill
+          <Plus className="h-4 w-4 shrink-0" /> Add skill
         </Button>
       </form>
 
@@ -314,7 +314,7 @@ export function SkillsManager({ initialSkills }: { initialSkills: Skill[] }) {
                     aria-label={`Edit ${skill.name}`}
                     onClick={() => startEdit(skill)}
                   >
-                    <Pencil className="h-4 w-4" />
+                    <Pencil className="h-4 w-4 shrink-0" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -323,7 +323,7 @@ export function SkillsManager({ initialSkills }: { initialSkills: Skill[] }) {
                     loading={deletingId === skill.id}
                     onClick={() => void handleDelete(skill)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4 shrink-0" />
                   </Button>
                 </div>
               </li>

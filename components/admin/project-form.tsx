@@ -293,7 +293,7 @@ export function ProjectForm({
                       )
                     }
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4 shrink-0" />
                   </Button>
                   <Input
                     className="md:col-span-2"
@@ -314,7 +314,7 @@ export function ProjectForm({
                   set("gallery", [...values.gallery, { url: "", alt: "" }])
                 }
               >
-                <Plus className="h-4 w-4" /> Add gallery image
+                <Plus className="h-4 w-4 shrink-0" /> Add gallery image
               </Button>
             </div>
           </Field>
@@ -635,7 +635,7 @@ function ChoiceGrid<T>({
             size="sm"
             onClick={() => onToggle(item)}
           >
-            {selected && <Check className="h-4 w-4" />}
+            {selected && <Check className="h-4 w-4 shrink-0" />}
             {getLabel(item)}
           </Button>
         );
