@@ -18,8 +18,10 @@ export class MockProviderStrategy implements LLMProviderStrategy {
 
   async generateProviderResponse({
     prompt,
+    systemInstructions,
   }: {
     prompt: string;
+    systemInstructions: string;
   }): Promise<string> {
     // Simulate a delay to mimic real API response time
     await new Promise((resolve) => setTimeout(resolve, 1000));
