@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   let raw: unknown;
 
   const ip = getClientIp(request);
-  const { success } = checkRateLimit({ ip, keyPrefix: "assistant", limit: 10 });
+  const { success } = checkRateLimit({ ip, keyPrefix: "assistant", limit: 3 });
   if (!success) {
     return Response.json(
       { ok: false, error: "Too many requests. Please try again later." },

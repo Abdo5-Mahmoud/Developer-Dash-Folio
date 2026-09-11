@@ -1,13 +1,17 @@
 import { jest, describe, test, expect, beforeEach } from "@jest/globals";
 
-const mockRequireAdminSession = jest.fn();
-const mockValidateAdminCredentials = jest.fn();
-const mockCreateSession = jest.fn();
-const mockParseProjectPayload = jest.fn();
-const mockValidateProject = jest.fn();
-const mockCreateProject = jest.fn();
-const mockUpdateProject = jest.fn();
-const mockDeleteProject = jest.fn();
+type TestSession = { email: string; expiresAt: number };
+
+const mockRequireAdminSession = jest.fn<() => Promise<TestSession | null>>();
+const mockValidateAdminCredentials =
+  jest.fn<(...args: unknown[]) => Promise<boolean>>();
+const mockCreateSession = jest.fn<(email: string) => string>();
+const mockParseProjectPayload = jest.fn<(...args: unknown[]) => unknown>();
+const mockValidateProject =
+  jest.fn<(...args: unknown[]) => Record<string, string>>();
+const mockCreateProject = jest.fn<(...args: unknown[]) => Promise<unknown>>();
+const mockUpdateProject = jest.fn<(...args: unknown[]) => Promise<unknown>>();
+const mockDeleteProject = jest.fn<(...args: unknown[]) => Promise<boolean>>();
 
 jest.mock("@/lib/auth", () => ({
   SESSION_COOKIE_NAME: "devfolio_admin_session",
@@ -30,14 +34,13 @@ jest.mock("@/lib/auth", () => ({
     sameSite: "lax",
     secure: false,
   },
-  createSession: (email: string) =>
-    `session:${String(email).trim().toLowerCase()}`,
+  createSession: (email: string) => mockCreateSession(email),
   validateAdminCredentials: (...args: unknown[]) =>
     mockValidateAdminCredentials(...args),
 }));
 
 jest.mock("@/lib/session", () => ({
-  requireAdminSession: (...args: unknown[]) => mockRequireAdminSession(...args),
+  requireAdminSession: () => mockRequireAdminSession(),
 }));
 
 jest.mock("@/features/projects/lib/projects", () => ({
@@ -48,12 +51,12 @@ jest.mock("@/features/projects/lib/projects", () => ({
   validateProject: (...args: unknown[]) => mockValidateProject(...args),
 }));
 
-import { POST as loginRoutePOST } from "@/app/api/auth/login/route";
-import {
-  DELETE as deleteProjectRouteDELETE,
-  PUT as updateProjectRoutePUT,
-} from "@/app/api/projects/[id]/route";
-import { POST as createProjectRoutePOST } from "@/app/api/projects/route";
+const { POST: loginRoutePOST } =
+  require("@/app/api/auth/login/route") as typeof import("@/app/api/auth/login/route");
+const { DELETE: deleteProjectRouteDELETE, PUT: updateProjectRoutePUT } =
+  require("@/app/api/projects/[id]/route") as typeof import("@/app/api/projects/[id]/route");
+const { POST: createProjectRoutePOST } =
+  require("@/app/api/projects/route") as typeof import("@/app/api/projects/route");
 
 describe("API boundary routes", () => {
   beforeEach(() => {
