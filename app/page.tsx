@@ -8,6 +8,8 @@ import { FeaturedProjectsSection } from "@/features/projects/components/featured
 import { ContactSection } from "@/features/home/components/contact-section";
 import { Footer } from "@/components/layout/footer";
 
+export const revalidate = 60;
+
 export default async function HomePage() {
   const featured = await getFeaturedProjects();
   const tech = await getAllTechnologies();
@@ -25,10 +27,7 @@ export default async function HomePage() {
               Working with
             </span>
             {tech.map((t) => (
-              <span
-                key={t.id}
-                className="font-mono text-sm text-foreground/80"
-              >
+              <span key={t.id} className="font-mono text-sm text-foreground/80">
                 {t.name}
               </span>
             ))}

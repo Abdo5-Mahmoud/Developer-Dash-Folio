@@ -5,6 +5,8 @@ import { Footer } from "@/components/layout/footer";
 import { ProjectsPageHeader } from "@/features/projects/components/projects-page-header";
 import { ProjectsGrid } from "@/features/projects/components/projects-grid";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Projects — Engineering & Architecture Portfolio",
   description:

@@ -3,6 +3,8 @@ import { Navbar } from "@/components/layout/navbar";
 import { Badge } from "@/components/ui/badge";
 import { getAllSkills } from "@/features/home/lib/skills";
 
+export const revalidate = 60;
+
 export default async function page() {
   const skills = await getAllSkills();
   const grouped = skills.reduce<Record<string, typeof skills>>((acc, s) => {

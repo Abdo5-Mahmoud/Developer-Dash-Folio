@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { isValidObjectId, Types } from "mongoose";
 
 import { connectToDatabase } from "@/lib/mongodb";
@@ -24,7 +24,7 @@ function toTechnology(
 
 // ---------------- Public reads ----------------
 
-export async function getAllTechnologies(): Promise<Technology[]> {
+async function fetchAllTechnologies(): Promise<Technology[]> {
   await connectToDatabase();
   const docs = (await TechnologyModel.find()
     .collation({ locale: "en", strength: 2 })
@@ -32,6 +32,15 @@ export async function getAllTechnologies(): Promise<Technology[]> {
     .lean()) as (TechnologyDocument & { _id: Types.ObjectId })[];
   return docs.map(toTechnology);
 }
+
+export const getAllTechnologies = unstable_cache(
+  fetchAllTechnologies,
+  ["technologies"],
+  {
+    revalidate: 60,
+    tags: ["technologies"],
+  },
+);
 
 // ---------------- Payload parsing & validation ----------------
 
@@ -111,6 +120,7 @@ export type DeleteResult = "deleted" | "not-found" | "in-use";
 
 function revalidateTechnologyPages() {
   revalidatePath("/");
+  revalidateTag("technologies", "max");
 }
 
 async function technologyNameTaken(name: string, excludeId?: string) {

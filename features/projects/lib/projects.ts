@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { isValidObjectId, Types } from "mongoose";
 import { cache } from "react";
 
@@ -117,12 +117,21 @@ async function fetchProjectCardData(
 // ---------------- Public reads (published only) ----------------
 
 export async function getAllProjectCardData(): Promise<ProjectCardData[]> {
-  return fetchProjectCardData(false);
+  return getCachedProjectCardData(false);
 }
 
 export async function getFeaturedProjects(): Promise<ProjectCardData[]> {
-  return fetchProjectCardData(true);
+  return getCachedProjectCardData(true);
 }
+
+const getCachedProjectCardData = unstable_cache(
+  (featuredOnly: boolean) => fetchProjectCardData(featuredOnly),
+  ["project-cards"],
+  {
+    revalidate: 60,
+    tags: ["projects"],
+  },
+);
 
 // ---------------- Public reads (published only) ----------------
 
@@ -152,18 +161,25 @@ export async function getAllProjects(
 }
 
 export const getProjectBySlug = cache(
-  async (slug: string): Promise<Project | null> => {
-    await connectToDatabase();
-    const doc = await ProjectModel.findOne({ slug, status: "published" }).lean<
-      | (ProjectDocument & {
-          _id: Types.ObjectId;
-          createdAt?: Date;
-          updatedAt?: Date;
-        })
-      | null
-    >();
-    return doc ? toProject(doc) : null;
-  },
+  unstable_cache(
+    async (slug: string): Promise<Project | null> => {
+      await connectToDatabase();
+      const doc = await ProjectModel.findOne({
+        slug,
+        status: "published",
+      }).lean<
+        | (ProjectDocument & {
+            _id: Types.ObjectId;
+            createdAt?: Date;
+            updatedAt?: Date;
+          })
+        | null
+      >();
+      return doc ? toProject(doc) : null;
+    },
+    ["project-by-slug"],
+    { revalidate: 60, tags: ["projects"] },
+  ),
 );
 
 // ---------------- Knowledge digest (projected, used by AI assistant) ----------------
@@ -183,7 +199,11 @@ export async function getProjectKnowledgeDigests(): Promise<
     { _id: 0, title: 1, summary: 1, "techStack.name": 1 },
   )
     .sort({ displayOrder: 1, createdAt: 1 })
-    .lean()) as Array<{ title: string; summary: string; techStack?: { name: string }[] }>;
+    .lean()) as Array<{
+    title: string;
+    summary: string;
+    techStack?: { name: string }[];
+  }>;
   return docs.map((doc) => ({
     title: doc.title,
     summary: doc.summary,
@@ -453,6 +473,7 @@ function revalidatePublicProjectPages(slug: string) {
   revalidatePath("/");
   revalidatePath("/projects");
   revalidatePath(`/projects/${slug}`);
+  revalidateTag("projects", "max");
 }
 
 // ---------------- Mutations ----------------

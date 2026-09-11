@@ -38,11 +38,10 @@ export function checkRateLimit({
   const key = keyPrefix ? `${keyPrefix}:${ip}` : ip;
   const now = Date.now();
   const record = tracker.get(key);
-  console.log(record);
+  // console.log(record);
 
   if (!record || now > record.resetTime) {
     tracker.set(key, { count: 1, resetTime: now + window });
-    console.log(`Rate limit record created for ${key}:`, tracker.get(key));
     return { success: true, remaining: limit - 1 };
   }
   if (record.count >= limit) {

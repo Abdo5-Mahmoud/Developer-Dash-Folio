@@ -1,9 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import {
-  getProjectBySlug,
-  getAllProjects,
-} from "@/features/projects/lib/projects";
+import { getProjectBySlug } from "@/features/projects/lib/projects";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ProjectHeader } from "@/features/projects/components/project-header";
@@ -20,9 +17,10 @@ interface ProjectDetailsPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  const projects = await getAllProjects();
-  return projects.map((p) => ({ slug: p.slug }));
+export const revalidate = 60;
+
+export function generateStaticParams() {
+  return [];
 }
 
 export async function generateMetadata({
@@ -95,7 +93,8 @@ export default async function page({ params }: ProjectDetailsPageProps) {
                 </>
               )}
 
-              {(project.aiPrompts.length > 0 || project.aiMistakes.length > 0) && (
+              {(project.aiPrompts.length > 0 ||
+                project.aiMistakes.length > 0) && (
                 <>
                   <Separator />
                   <ProjectAIProcess project={project} />

@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { isValidObjectId, Types } from "mongoose";
 
 import { connectToDatabase } from "@/lib/mongodb";
@@ -8,9 +8,7 @@ import { SkillModel, type SkillDocument } from "@/lib/models/skill";
 import { SKILL_CATEGORIES } from "../data/skills";
 import type { Skill, SkillCategory, SkillInput } from "../types/skill";
 
-function toSkill(
-  doc: SkillDocument & { _id: Types.ObjectId },
-): Skill {
+function toSkill(doc: SkillDocument & { _id: Types.ObjectId }): Skill {
   return {
     id: doc._id.toString(),
     name: doc.name,
@@ -21,7 +19,7 @@ function toSkill(
 
 // ---------------- Public reads ----------------
 
-export async function getAllSkills(): Promise<Skill[]> {
+async function fetchAllSkills(): Promise<Skill[]> {
   await connectToDatabase();
   const docs = (await SkillModel.find()
     .collation({ locale: "en", strength: 2 })
@@ -29,6 +27,11 @@ export async function getAllSkills(): Promise<Skill[]> {
     .lean()) as (SkillDocument & { _id: Types.ObjectId })[];
   return docs.map(toSkill);
 }
+
+export const getAllSkills = unstable_cache(fetchAllSkills, ["skills"], {
+  revalidate: 60,
+  tags: ["skills"],
+});
 
 // Presentational grouping (display categories + "used in project" links)
 // is not part of the Skill model, so it stays static.
@@ -101,6 +104,7 @@ export type DeleteResult = "deleted" | "not-found" | "in-use";
 function revalidateSkillPages() {
   revalidatePath("/");
   revalidatePath("/about");
+  revalidateTag("skills", "max");
 }
 
 async function skillNameTaken(name: string, excludeId?: string) {
