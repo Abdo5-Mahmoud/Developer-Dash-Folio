@@ -49,6 +49,12 @@ function toProject(
     aiPrompts: doc.aiPrompts ?? [],
     aiMistakes: doc.aiMistakes ?? [],
     engineeringDecisions: doc.engineeringDecisions ?? [],
+    githubMetadata: doc.githubMetadata
+      ? {
+          ...doc.githubMetadata,
+          lastSyncedAt: doc.githubMetadata.lastSyncedAt?.toISOString(),
+        }
+      : undefined,
     featured: doc.featured,
     displayOrder: doc.displayOrder,
     createdAt: doc.createdAt?.toISOString() ?? new Date().toISOString(),
@@ -300,6 +306,41 @@ function cleanEntryList<T extends Record<string, unknown>>(
     .slice(0, 50);
 }
 
+function parseGithubMetadata(raw: unknown): ProjectInput["githubMetadata"] {
+  if (typeof raw !== "object" || raw === null) return undefined;
+  const record = raw as Record<string, unknown>;
+  if (
+    typeof record.owner !== "string" ||
+    typeof record.repository !== "string"
+  ) {
+    return undefined;
+  }
+
+  const languages = Array.isArray(record.languages)
+    ? record.languages
+        .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null)
+        .map((item) => ({
+          name: typeof item.name === "string" ? item.name.trim().slice(0, 100) : "",
+          bytes: typeof item.bytes === "number" && Number.isFinite(item.bytes) ? Math.max(0, item.bytes) : 0,
+        }))
+        .filter((item) => item.name)
+        .slice(0, 20)
+    : [];
+
+  return {
+    owner: record.owner.trim().slice(0, 100),
+    repository: record.repository.trim().slice(0, 200),
+    defaultBranch: asString(record.defaultBranch, 200),
+    description: asString(record.description, 500),
+    language: asString(record.language, 100),
+    topics: asStringArray(record.topics).slice(0, 20),
+    stars: typeof record.stars === "number" && Number.isFinite(record.stars) ? Math.max(0, Math.trunc(record.stars)) : 0,
+    forks: typeof record.forks === "number" && Number.isFinite(record.forks) ? Math.max(0, Math.trunc(record.forks)) : 0,
+    languages,
+    lastSyncedAt: asString(record.lastSyncedAt, 100),
+  };
+}
+
 /**
  * Coerces an untrusted JSON body into a valid ProjectInput.
  * Returns null when required scalar fields are missing/wrong-typed.
@@ -421,6 +462,7 @@ export function parseProjectPayload(raw: unknown): ProjectInput | null {
       ["decision", "rationale"],
       ["alternatives"],
     ).map((entry) => ({ ...entry, alternatives: entry.alternatives ?? [] })),
+    githubMetadata: parseGithubMetadata(record.githubMetadata),
     featured: record.featured === true,
     displayOrder,
   };
@@ -512,4 +554,20 @@ export async function deleteProject(id: string): Promise<boolean> {
   if (!doc) return false;
   revalidatePublicProjectPages(doc.slug);
   return true;
+}
+
+export async function updateProjectGithubMetadata(
+  id: string,
+  githubMetadata: NonNullable<ProjectDocument["githubMetadata"]>,
+): Promise<Project | null> {
+  if (!isValidObjectId(id)) return null;
+  await connectToDatabase();
+  const doc = await ProjectModel.findByIdAndUpdate(
+    id,
+    { $set: { githubMetadata } },
+    { new: true },
+  );
+  if (!doc) return null;
+  revalidatePublicProjectPages(doc.slug);
+  return toProject(doc);
 }

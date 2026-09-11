@@ -47,6 +47,24 @@ export interface DecisionEntry {
   rationale: string;
 }
 
+export interface GithubLanguage {
+  name: string;
+  bytes: number;
+}
+
+export interface GithubMetadata {
+  owner: string;
+  repository: string;
+  defaultBranch?: string;
+  description?: string;
+  language?: string;
+  topics: string[];
+  stars: number;
+  forks: number;
+  languages: GithubLanguage[];
+  lastSyncedAt?: string;
+}
+
 export type ProjectStatus = "draft" | "published";
 
 // Form/API payload shape — id and timestamps are server-assigned.
@@ -82,6 +100,7 @@ export interface Project {
   aiPrompts: AIPromptEntry[];
   aiMistakes: AIMistakeEntry[];
   engineeringDecisions: DecisionEntry[];
+  githubMetadata?: GithubMetadata;
   featured: boolean;
   displayOrder: number;
   createdAt: string;

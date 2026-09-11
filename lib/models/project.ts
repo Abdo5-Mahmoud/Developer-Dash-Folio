@@ -64,6 +64,22 @@ const DecisionEntrySchema = new Schema(
   { _id: false }
 );
 
+const GithubMetadataSchema = new Schema(
+  {
+    owner: { type: String, required: true },
+    repository: { type: String, required: true },
+    defaultBranch: String,
+    description: String,
+    language: String,
+    topics: [String],
+    stars: { type: Number, default: 0 },
+    forks: { type: Number, default: 0 },
+    languages: [{ name: String, bytes: Number }],
+    lastSyncedAt: Date,
+  },
+  { _id: false },
+);
+
 const ProjectSchema = new Schema(
   {
     slug: { type: String, required: true, unique: true, index: true },
@@ -93,6 +109,7 @@ const ProjectSchema = new Schema(
     aiPrompts: [AIPromptEntrySchema],
     aiMistakes: [AIMistakeEntrySchema],
     engineeringDecisions: [DecisionEntrySchema],
+    githubMetadata: GithubMetadataSchema,
     featured: { type: Boolean, default: false },
     displayOrder: { type: Number, default: 0 },
   },
@@ -125,6 +142,18 @@ export interface ProjectDocument extends Document {
   aiPrompts: { purpose: string; prompt: string }[];
   aiMistakes: { mistake: string; caughtBy: string; correction: string }[];
   engineeringDecisions: { decision: string; alternatives: string[]; rationale: string }[];
+  githubMetadata?: {
+    owner: string;
+    repository: string;
+    defaultBranch?: string;
+    description?: string;
+    language?: string;
+    topics: string[];
+    stars: number;
+    forks: number;
+    languages: { name: string; bytes: number }[];
+    lastSyncedAt?: Date;
+  };
   featured: boolean;
   displayOrder: number;
 }

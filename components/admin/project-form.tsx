@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, Plus, Trash2 } from "lucide-react";
+import { Check, Github, Plus, Trash2 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +12,7 @@ import { Callout } from "@/components/ui/callout";
 import { RepeatableField } from "@/components/admin/repeatable-field";
 import type {
   ProjectInput,
+  Project,
   ProjectStatus,
   Skill,
   Technology,
@@ -34,11 +35,17 @@ export function ProjectForm({
   initialValues,
   technologies,
   skills,
+  projectId,
+  onSyncGithub,
+  onImportGithub,
   onSubmit,
 }: {
   initialValues: ProjectFormValues;
   technologies: Technology[];
   skills: Skill[];
+  projectId?: string;
+  onSyncGithub?: () => Promise<Project>;
+  onImportGithub?: (githubUrl: string) => Promise<ProjectFormValues>;
   onSubmit: (values: ProjectFormValues, status: ProjectStatus) => Promise<void>;
 }) {
   const [values, setValues] = React.useState<ProjectFormValues>(initialValues);
@@ -46,6 +53,9 @@ export function ProjectForm({
     null,
   );
   const [error, setError] = React.useState<string | null>(null);
+  const [syncingGithub, setSyncingGithub] = React.useState(false);
+  const [importGithubUrl, setImportGithubUrl] = React.useState(initialValues.githubUrl ?? "");
+  const [importingGithub, setImportingGithub] = React.useState(false);
 
   function set<K extends keyof ProjectFormValues>(
     key: K,
@@ -65,6 +75,38 @@ export function ProjectForm({
       );
     } finally {
       setSavingStatus(null);
+    }
+  }
+
+  async function syncGithub() {
+    if (!onSyncGithub) return;
+    setError(null);
+    setSyncingGithub(true);
+    try {
+      const project = await onSyncGithub();
+      setValues((current) => ({
+        ...current,
+        githubMetadata: project.githubMetadata,
+      }));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "GitHub sync failed.");
+    } finally {
+      setSyncingGithub(false);
+    }
+  }
+
+  async function importGithub() {
+    if (!onImportGithub || !importGithubUrl.trim()) return;
+    setError(null);
+    setImportingGithub(true);
+    try {
+      const imported = await onImportGithub(importGithubUrl.trim());
+      setValues(imported);
+      setImportGithubUrl(imported.githubUrl ?? "");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "GitHub import failed.");
+    } finally {
+      setImportingGithub(false);
     }
   }
 
@@ -114,6 +156,19 @@ export function ProjectForm({
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
+          {projectId && onSyncGithub && (
+            <Button
+              type="button"
+              variant="secondary"
+              loading={syncingGithub}
+              disabled={!values.githubUrl?.trim()}
+              onClick={() => void syncGithub()}
+              title="Sync public repository metadata"
+            >
+              {!syncingGithub && <Github className="h-4 w-4 shrink-0" />}
+              <span>Sync GitHub</span>
+            </Button>
+          )}
           <Button
             variant="secondary"
             loading={savingStatus === "draft"}
@@ -142,6 +197,34 @@ export function ProjectForm({
           Title, summary, full description, and at least one technology are
           required.
         </Callout>
+      )}
+
+      {onImportGithub && (
+        <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:items-end">
+          <div className="min-w-0 flex-1">
+            <Label htmlFor="github-import-url">Import a public GitHub project</Label>
+            <Input
+              id="github-import-url"
+              value={importGithubUrl}
+              onChange={(event) => setImportGithubUrl(event.target.value)}
+              placeholder="https://github.com/owner/repository"
+              autoComplete="off"
+            />
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              Imports repository details, README, topics, and detected languages for review.
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            loading={importingGithub}
+            disabled={!importGithubUrl.trim()}
+            onClick={() => void importGithub()}
+          >
+            {!importingGithub && <Github className="h-4 w-4 shrink-0" />}
+            Import project
+          </Button>
+        </div>
       )}
 
       <Tabs defaultValue="overview">
@@ -334,7 +417,10 @@ export function ProjectForm({
               getLabel={(item) => item.name}
             />
           </Field>
-          <Field label="Related skills" hint="Used for site-wide filtering.">
+          <Field
+            label="Related skills"
+            hint="Used for site-wide filtering. Skills do not replace the required technology selection above."
+          >
             <ChoiceGrid
               items={skills}
               isSelected={(item) => values.skillIds.includes(item.id)}

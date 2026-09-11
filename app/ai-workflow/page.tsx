@@ -37,7 +37,6 @@ import {
 import { Callout } from "@/components/ui/callout";
 import { CodeBlock } from "@/components/ui/code-block";
 import { Separator } from "@/components/ui/separator";
-import { AiAssistant } from "@/features/ai-workflow/components/ai-assistant";
 
 export const metadata: Metadata = {
   title: "AI Workflow & Engineering Protocol — Devfolio AI",
@@ -715,9 +714,8 @@ if (values.company_url) {
               </p>
             </div>
 
-            {/* Embedded Live Assistant */}
             <div className="rounded-xl border border-border bg-surface p-4 sm:p-6 shadow-sm">
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
                   <div className="size-2 rounded-full bg-success animate-pulse" />
                   <span className="font-mono text-xs font-semibold text-foreground">
@@ -732,8 +730,11 @@ if (values.company_url) {
                   </span>
                 </div>
               </div>
-
-              <AiAssistant />
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                Open the floating assistant in the lower-right corner to ask
+                about skills, projects, and contact details without leaving the
+                page.
+              </p>
             </div>
           </section>
 
