@@ -68,7 +68,10 @@ export interface GithubMetadata {
 export type ProjectStatus = "draft" | "published";
 
 // Form/API payload shape — id and timestamps are server-assigned.
-export type ProjectInput = Omit<Project, "id" | "slug" | "status" | "createdAt" | "updatedAt"> & {
+export type ProjectInput = Omit<
+  Project,
+  "id" | "slug" | "status" | "createdAt" | "updatedAt"
+> & {
   slug?: string;
   status?: ProjectStatus;
 };

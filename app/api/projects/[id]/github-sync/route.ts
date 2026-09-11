@@ -30,7 +30,8 @@ export async function POST(_request: Request, { params }: RouteContext) {
     });
     return Response.json({ ok: true, project: updatedProject });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "GitHub sync failed.";
+    const message =
+      error instanceof Error ? error.message : "GitHub sync failed.";
     return Response.json({ ok: false, error: message }, { status: 502 });
   }
 }

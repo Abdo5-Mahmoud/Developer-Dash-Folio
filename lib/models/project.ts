@@ -6,7 +6,7 @@ import { Schema, model, models, type Document } from "mongoose";
 
 const GalleryImageSchema = new Schema(
   { url: { type: String, required: true }, alt: String, caption: String },
-  { _id: false }
+  { _id: false },
 );
 
 const StackEntrySchema = new Schema(
@@ -14,12 +14,15 @@ const StackEntrySchema = new Schema(
     technologyId: { type: String, required: true },
     name: { type: String, required: true }, // denormalized for display
   },
-  { _id: false }
+  { _id: false },
 );
 
 const PatternEntrySchema = new Schema(
-  { name: { type: String, required: true }, rationale: { type: String, required: true } },
-  { _id: false }
+  {
+    name: { type: String, required: true },
+    rationale: { type: String, required: true },
+  },
+  { _id: false },
 );
 
 const AlgorithmEntrySchema = new Schema(
@@ -28,22 +31,28 @@ const AlgorithmEntrySchema = new Schema(
     rationale: { type: String, required: true },
     complexity: String,
   },
-  { _id: false }
+  { _id: false },
 );
 
 const PerformanceEntrySchema = new Schema(
   { technique: { type: String, required: true }, impact: String },
-  { _id: false }
+  { _id: false },
 );
 
 const ChallengeEntrySchema = new Schema(
-  { challenge: { type: String, required: true }, resolution: { type: String, required: true } },
-  { _id: false }
+  {
+    challenge: { type: String, required: true },
+    resolution: { type: String, required: true },
+  },
+  { _id: false },
 );
 
 const AIPromptEntrySchema = new Schema(
-  { purpose: { type: String, required: true }, prompt: { type: String, required: true } },
-  { _id: false }
+  {
+    purpose: { type: String, required: true },
+    prompt: { type: String, required: true },
+  },
+  { _id: false },
 );
 
 const AIMistakeEntrySchema = new Schema(
@@ -52,7 +61,7 @@ const AIMistakeEntrySchema = new Schema(
     caughtBy: { type: String, required: true },
     correction: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const DecisionEntrySchema = new Schema(
@@ -61,7 +70,7 @@ const DecisionEntrySchema = new Schema(
     alternatives: [String],
     rationale: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const GithubMetadataSchema = new Schema(
@@ -88,7 +97,12 @@ const ProjectSchema = new Schema(
     features: [String],
     summary: { type: String, required: true },
     fullDescription: { type: String, required: true },
-    status: { type: String, enum: ["draft", "published"], default: "draft", index: true },
+    status: {
+      type: String,
+      enum: ["draft", "published"],
+      default: "draft",
+      index: true,
+    },
     coverImage: String,
     coverImageAlt: String,
     gallery: [GalleryImageSchema],
@@ -113,7 +127,7 @@ const ProjectSchema = new Schema(
     featured: { type: Boolean, default: false },
     displayOrder: { type: Number, default: 0 },
   },
-  { timestamps: true } // gives createdAt / updatedAt to match lib/types.ts
+  { timestamps: true }, // gives createdAt / updatedAt to match lib/types.ts
 );
 
 export interface ProjectDocument extends Document {
@@ -141,7 +155,11 @@ export interface ProjectDocument extends Document {
   lessonsLearned?: string;
   aiPrompts: { purpose: string; prompt: string }[];
   aiMistakes: { mistake: string; caughtBy: string; correction: string }[];
-  engineeringDecisions: { decision: string; alternatives: string[]; rationale: string }[];
+  engineeringDecisions: {
+    decision: string;
+    alternatives: string[];
+    rationale: string;
+  }[];
   githubMetadata?: {
     owner: string;
     repository: string;
@@ -159,4 +177,5 @@ export interface ProjectDocument extends Document {
 }
 
 // `models.Project ||` guards against Next.js hot-reload redefining the model
-export const ProjectModel = models.Project || model<ProjectDocument>("Project", ProjectSchema);
+export const ProjectModel =
+  models.Project || model<ProjectDocument>("Project", ProjectSchema);

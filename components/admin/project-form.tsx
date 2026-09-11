@@ -54,7 +54,9 @@ export function ProjectForm({
   );
   const [error, setError] = React.useState<string | null>(null);
   const [syncingGithub, setSyncingGithub] = React.useState(false);
-  const [importGithubUrl, setImportGithubUrl] = React.useState(initialValues.githubUrl ?? "");
+  const [importGithubUrl, setImportGithubUrl] = React.useState(
+    initialValues.githubUrl ?? "",
+  );
   const [importingGithub, setImportingGithub] = React.useState(false);
 
   function set<K extends keyof ProjectFormValues>(
@@ -89,7 +91,9 @@ export function ProjectForm({
         githubMetadata: project.githubMetadata,
       }));
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "GitHub sync failed.");
+      setError(
+        caught instanceof Error ? caught.message : "GitHub sync failed.",
+      );
     } finally {
       setSyncingGithub(false);
     }
@@ -104,7 +108,9 @@ export function ProjectForm({
       setValues(imported);
       setImportGithubUrl(imported.githubUrl ?? "");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "GitHub import failed.");
+      setError(
+        caught instanceof Error ? caught.message : "GitHub import failed.",
+      );
     } finally {
       setImportingGithub(false);
     }
@@ -202,7 +208,9 @@ export function ProjectForm({
       {onImportGithub && (
         <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:items-end">
           <div className="min-w-0 flex-1">
-            <Label htmlFor="github-import-url">Import a public GitHub project</Label>
+            <Label htmlFor="github-import-url">
+              Import a public GitHub project
+            </Label>
             <Input
               id="github-import-url"
               value={importGithubUrl}
@@ -211,7 +219,8 @@ export function ProjectForm({
               autoComplete="off"
             />
             <p className="mt-1.5 text-xs text-muted-foreground">
-              Imports repository details, README, topics, and detected languages for review.
+              Imports repository details, README, topics, and detected languages
+              for review.
             </p>
           </div>
           <Button

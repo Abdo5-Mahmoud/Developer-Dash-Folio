@@ -3,7 +3,16 @@ import { fetchGithubImport } from "@/lib/github";
 import { requireAdminSession } from "@/lib/session";
 import type { ProjectInput } from "@/lib/types";
 
-function emptyImportedProject(): Omit<ProjectInput, "title" | "summary" | "fullDescription" | "features" | "githubUrl" | "githubMetadata" | "techStack"> {
+function emptyImportedProject(): Omit<
+  ProjectInput,
+  | "title"
+  | "summary"
+  | "fullDescription"
+  | "features"
+  | "githubUrl"
+  | "githubMetadata"
+  | "techStack"
+> {
   return {
     slug: "",
     category: "Imported from GitHub",
@@ -38,7 +47,10 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return Response.json({ ok: false, error: "Invalid JSON body." }, { status: 400 });
+    return Response.json(
+      { ok: false, error: "Invalid JSON body." },
+      { status: 400 },
+    );
   }
 
   const githubUrl =
@@ -46,17 +58,30 @@ export async function POST(request: Request) {
       ? (body as { githubUrl?: unknown }).githubUrl
       : undefined;
   if (typeof githubUrl !== "string" || !githubUrl.trim()) {
-    return Response.json({ ok: false, error: "A GitHub repository URL is required." }, { status: 422 });
+    return Response.json(
+      { ok: false, error: "A GitHub repository URL is required." },
+      { status: 422 },
+    );
   }
 
   try {
     const imported = await fetchGithubImport(githubUrl.trim());
     const technologies = await getAllTechnologies();
-    const byName = new Map(technologies.map((technology) => [technology.name.toLowerCase(), technology]));
+    const byName = new Map(
+      technologies.map((technology) => [
+        technology.name.toLowerCase(),
+        technology,
+      ]),
+    );
     const techStack = imported.githubMetadata.languages
       .map((language) => byName.get(language.name.toLowerCase()))
-      .filter((technology): technology is NonNullable<typeof technology> => Boolean(technology))
-      .map((technology) => ({ technologyId: technology.id, name: technology.name }));
+      .filter((technology): technology is NonNullable<typeof technology> =>
+        Boolean(technology),
+      )
+      .map((technology) => ({
+        technologyId: technology.id,
+        name: technology.name,
+      }));
 
     const project: ProjectInput = {
       ...emptyImportedProject(),
@@ -70,7 +95,8 @@ export async function POST(request: Request) {
     };
     return Response.json({ ok: true, project });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "GitHub import failed.";
+    const message =
+      error instanceof Error ? error.message : "GitHub import failed.";
     return Response.json({ ok: false, error: message }, { status: 502 });
   }
 }

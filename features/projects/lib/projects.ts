@@ -318,10 +318,17 @@ function parseGithubMetadata(raw: unknown): ProjectInput["githubMetadata"] {
 
   const languages = Array.isArray(record.languages)
     ? record.languages
-        .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null)
+        .filter(
+          (item): item is Record<string, unknown> =>
+            typeof item === "object" && item !== null,
+        )
         .map((item) => ({
-          name: typeof item.name === "string" ? item.name.trim().slice(0, 100) : "",
-          bytes: typeof item.bytes === "number" && Number.isFinite(item.bytes) ? Math.max(0, item.bytes) : 0,
+          name:
+            typeof item.name === "string" ? item.name.trim().slice(0, 100) : "",
+          bytes:
+            typeof item.bytes === "number" && Number.isFinite(item.bytes)
+              ? Math.max(0, item.bytes)
+              : 0,
         }))
         .filter((item) => item.name)
         .slice(0, 20)
@@ -334,8 +341,14 @@ function parseGithubMetadata(raw: unknown): ProjectInput["githubMetadata"] {
     description: asString(record.description, 500),
     language: asString(record.language, 100),
     topics: asStringArray(record.topics).slice(0, 20),
-    stars: typeof record.stars === "number" && Number.isFinite(record.stars) ? Math.max(0, Math.trunc(record.stars)) : 0,
-    forks: typeof record.forks === "number" && Number.isFinite(record.forks) ? Math.max(0, Math.trunc(record.forks)) : 0,
+    stars:
+      typeof record.stars === "number" && Number.isFinite(record.stars)
+        ? Math.max(0, Math.trunc(record.stars))
+        : 0,
+    forks:
+      typeof record.forks === "number" && Number.isFinite(record.forks)
+        ? Math.max(0, Math.trunc(record.forks))
+        : 0,
     languages,
     lastSyncedAt: asString(record.lastSyncedAt, 100),
   };
