@@ -5,7 +5,7 @@ import {
 } from "@/features/projects/lib/projects";
 import { getSkillCategories } from "@/features/home/lib/skills";
 import { getAllTechnologies } from "@/features/home/lib/technologies";
-import { ABOUT_HIGHLIGHTS } from "@/features/about/data/about";
+import { ABOUT_HIGHLIGHTS } from "@/features/home/data/about-highlights";
 
 export interface ProjectKnowledge {
   slug: string;

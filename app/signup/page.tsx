@@ -42,18 +42,28 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
         ) : (
           <>
             {error === "invalid" && (
-              <p className="mt-4 rounded-md bg-danger-muted px-3 py-2 text-sm text-danger" role="alert">
+              <p
+                className="mt-4 rounded-md bg-danger-muted px-3 py-2 text-sm text-danger"
+                role="alert"
+              >
                 Use a valid email and a password with at least 8 characters. The
                 passwords must match.
               </p>
             )}
             {error === "unavailable" && (
-              <p className="mt-4 rounded-md bg-danger-muted px-3 py-2 text-sm text-danger" role="alert">
+              <p
+                className="mt-4 rounded-md bg-danger-muted px-3 py-2 text-sm text-danger"
+                role="alert"
+              >
                 Account setup is temporarily unavailable. Check the database
                 connection and try again.
               </p>
             )}
-            <form action="/api/auth/signup" method="post" className="mt-6 flex flex-col gap-4">
+            <form
+              action="/api/auth/signup"
+              method="post"
+              className="mt-6 flex flex-col gap-4"
+            >
               <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground">
                 Email
                 <input
@@ -97,7 +107,10 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
         )}
 
         {created === "1" && (
-          <p className="mt-4 rounded-md bg-success-muted px-3 py-2 text-sm text-success" role="status">
+          <p
+            className="mt-4 rounded-md bg-success-muted px-3 py-2 text-sm text-success"
+            role="status"
+          >
             Account created. You can sign in now.
           </p>
         )}

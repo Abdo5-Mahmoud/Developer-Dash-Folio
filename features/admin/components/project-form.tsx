@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Callout } from "@/components/ui/callout";
-import { RepeatableField } from "@/components/admin/repeatable-field";
+import { RepeatableField } from "@/features/admin/components/repeatable-field";
 import type {
   ProjectInput,
   Project,

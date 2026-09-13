@@ -340,6 +340,21 @@ export async function getAllProjectsAdmin(
   ownerId?: string,
 ): Promise<Project[]> {
   await connectToDatabase();
+
+  if (ownerId) {
+    // Adopt projects created before ownerId was introduced into the only owner's account.
+    await ProjectModel.updateMany(
+      {
+        $or: [
+          { ownerId: { $exists: false } },
+          { ownerId: null },
+          { ownerId: "" },
+        ],
+      },
+      { $set: { ownerId } },
+    );
+  }
+
   const docs = await ProjectModel.find(ownerId ? { ownerId } : {})
     .sort({ displayOrder: 1, createdAt: 1 })
     .lean();

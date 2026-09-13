@@ -2,6 +2,7 @@ import jwt, { type JwtPayload } from "jsonwebtoken";
 
 import { UserModel, type UserRole } from "@/lib/models/user";
 import { connectToDatabase } from "@/lib/mongodb";
+import { comparePassword } from "./bcrypt";
 
 export const SESSION_COOKIE_NAME = "devfolio_admin_session";
 const SESSION_DURATION = "8h";
@@ -35,8 +36,7 @@ export async function authenticateOwner(
 
   if (!user) return null;
 
-  const bcrypt = await import("bcryptjs");
-  const validPassword = await bcrypt.compare(password, user.passwordHash);
+  const validPassword = await comparePassword(password, user.passwordHash);
   if (!validPassword) return null;
 
   return { id: user._id.toString(), email: user.email, role: user.role };

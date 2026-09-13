@@ -2,9 +2,9 @@ import { getFeaturedProjects } from "@/features/projects/lib/projects";
 import { getAllTechnologies } from "@/features/home/lib/technologies";
 import { Navbar } from "@/components/layout/navbar";
 import { Hero } from "@/features/home/components/hero";
-import { AboutSection } from "@/features/about/components/about-section";
+import { AboutSection } from "@/features/home/components/about-section";
 import { SkillsSection } from "@/features/home/components/skills-section";
-import { FeaturedProjectsSection } from "@/features/projects/components/featured-projects-section";
+import { FeaturedProjectsSection } from "@/features/home/components/featured-projects-section";
 import { ContactSection } from "@/features/home/components/contact-section";
 import { Footer } from "@/components/layout/footer";
 

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { UserModel } from "@/lib/models/user";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limiter";
+import { hashPassword } from "@/lib/bcrypt";
 
 export async function POST(request: Request) {
   const ip = getClientIp(request);
@@ -18,7 +19,10 @@ export async function POST(request: Request) {
   try {
     formData = await request.formData();
   } catch {
-    return NextResponse.redirect(new URL("/signup?error=invalid", request.url), 303);
+    return NextResponse.redirect(
+      new URL("/signup?error=invalid", request.url),
+      303,
+    );
   }
 
   const email = formData.get("email");
@@ -33,7 +37,10 @@ export async function POST(request: Request) {
     password.length < 8 ||
     password !== confirmPassword
   ) {
-    return NextResponse.redirect(new URL("/signup?error=invalid", request.url), 303);
+    return NextResponse.redirect(
+      new URL("/signup?error=invalid", request.url),
+      303,
+    );
   }
 
   try {
@@ -43,18 +50,14 @@ export async function POST(request: Request) {
       return NextResponse.redirect(new URL("/login", request.url), 303);
     }
 
-    const bcrypt = await import("bcryptjs");
-    const passwordHash = await bcrypt.hash(password, 12);
+    const passwordHash = await hashPassword(password);
     await UserModel.create({
       email: email.trim().toLowerCase(),
       passwordHash,
       role: "owner",
     });
 
-    return NextResponse.redirect(
-      new URL("/login?created=1", request.url),
-      303,
-    );
+    return NextResponse.redirect(new URL("/login?created=1", request.url), 303);
   } catch {
     return NextResponse.redirect(
       new URL("/signup?error=unavailable", request.url),

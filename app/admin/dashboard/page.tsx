@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import { DeleteProjectButton } from "@/components/admin/delete-project-button";
-import { SeedProjectsButton } from "@/components/admin/seed-projects-button";
+import { DeleteProjectButton } from "@/features/admin/components/delete-project-button";
+import { SeedProjectsButton } from "@/features/admin/components/seed-projects-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAllProjectsAdmin } from "@/features/projects/lib/projects";

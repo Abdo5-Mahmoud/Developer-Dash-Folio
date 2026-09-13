@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import {
   ProjectForm,
   type ProjectFormValues,
-} from "@/components/admin/project-form";
+} from "@/features/admin/components/project-form";
 import type { Project, ProjectStatus, Skill, Technology } from "@/lib/types";
 
 type ProjectEditorProps = {

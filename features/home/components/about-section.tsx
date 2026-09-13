@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { ABOUT_HIGHLIGHTS } from "../data/about";
+import { ABOUT_HIGHLIGHTS } from "../data/about-highlights";
 
 export function AboutSection() {
   const shouldReduceMotion = useReducedMotion();
@@ -47,7 +47,6 @@ export function AboutSection() {
           viewport={{ once: true, amount: 0.2 }}
           variants={containerVariants}
         >
-          {/* Section heading & label */}
           <motion.div className="lg:col-span-4" variants={itemVariants}>
             <Badge variant="outline" className="mb-4">
               About Me
@@ -60,7 +59,6 @@ export function AboutSection() {
             </h2>
           </motion.div>
 
-          {/* Narrative & Focus */}
           <div className="flex flex-col gap-5 lg:col-span-8">
             <motion.p
               variants={itemVariants}
@@ -71,7 +69,6 @@ export function AboutSection() {
               high-performance web applications with clean system architecture
               and maintainable codebases.
             </motion.p>
-
             <motion.p
               variants={itemVariants}
               className="text-base leading-relaxed text-muted-foreground"
@@ -80,7 +77,6 @@ export function AboutSection() {
               architectures, TypeScript-first development, component-driven
               design systems, and scalable data flow patterns.
             </motion.p>
-
             <motion.p
               variants={itemVariants}
               className="text-base leading-relaxed text-muted-foreground"
@@ -92,8 +88,6 @@ export function AboutSection() {
               iteration while relying on strong engineering fundamentals to
               verify correctness, security, and long-term maintainability.
             </motion.p>
-
-            {/* Supporting highlights */}
             <motion.div
               variants={itemVariants}
               className="mt-3 grid gap-6 border-t border-border pt-6 sm:grid-cols-3"

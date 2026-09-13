@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     );
     response.cookies.set(
       SESSION_COOKIE_NAME,
-      await createSession(owner),
+      createSession(owner),
       sessionCookie,
     );
     return response;

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { SkillsManager } from "@/components/admin/skills-manager";
+import { SkillsManager } from "@/features/admin/components/skills-manager";
 import { getAllSkills } from "@/features/home/lib/skills";
 
 export const metadata: Metadata = {

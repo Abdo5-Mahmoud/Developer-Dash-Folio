@@ -5,8 +5,8 @@ import { ArrowRight } from "lucide-react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ProjectCard } from "./project-card";
-import type { ProjectCardData } from "../types/project";
+import { ProjectCard } from "@/features/projects/components/project-card";
+import type { ProjectCardData } from "@/features/projects/types/project";
 
 interface FeaturedProjectsSectionProps {
   projects: ProjectCardData[];
@@ -57,7 +57,6 @@ export function FeaturedProjectsSection({
           variants={containerVariants}
           className="flex flex-col gap-10"
         >
-          {/* Header */}
           <motion.div
             variants={itemVariants}
             className="flex flex-col justify-between gap-4 md:flex-row md:items-end"
@@ -86,7 +85,6 @@ export function FeaturedProjectsSection({
             </Button>
           </motion.div>
 
-          {/* Projects Grid */}
           <motion.div
             variants={containerVariants}
             className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
