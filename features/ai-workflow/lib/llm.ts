@@ -32,6 +32,39 @@ export class MockProviderStrategy implements LLMProviderStrategy {
 class GeminiClient {
   readonly providerName: string = "gemini-3.6-flash";
   constructor(private apiKey: string) {}
+
+  private async parseUpstreamError(
+    response: Response,
+    fallbackMessage = "AI provider request failed",
+  ): Promise<LLMError> {
+    const responseText = await response.text().catch(() => "");
+    let parsed: GeminiPayload | null = null;
+
+    if (responseText) {
+      try {
+        parsed = JSON.parse(responseText) as GeminiPayload;
+      } catch {
+        parsed = null;
+      }
+    }
+
+    const providerMessage = parsed?.error?.message?.trim();
+    if (providerMessage) {
+      return new LLMError(
+        parsed?.error?.code ?? response.status,
+        this.providerName,
+        providerMessage,
+      );
+    }
+
+    const message =
+      responseText.trim().length > 0
+        ? `Upstream error: ${responseText}`
+        : fallbackMessage;
+
+    return new LLMError(response.status, this.providerName, message);
+  }
+
   async generateContent({
     prompt,
     systemInstructions,
@@ -41,40 +74,43 @@ class GeminiClient {
   }): Promise<GeminiPayload> {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${this.providerName}:generateContent?key=${this.apiKey}`;
 
-    let upstream: Response;
-    try {
-      upstream = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt.trim() }], role: "user" }],
-          systemInstruction: { parts: [{ text: systemInstructions }] },
-        }),
-      });
-    } catch (error) {
-      console.error(
-        `[Assistant API] Network or timeout error connecting to Google Generative AI (${this.providerName}):`,
-        error,
-      );
-      throw new LLMError(
-        503,
-        this.providerName,
-        "Network timeout contacting AI provider",
-        error as Error,
-      );
+    let upstream: Response | undefined;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        upstream = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt.trim() }], role: "user" }],
+            systemInstruction: { parts: [{ text: systemInstructions }] },
+          }),
+        });
+      } catch (error) {
+        console.error(
+          `[Assistant API] Network or timeout error connecting to Google Generative AI (${this.providerName}):`,
+          error,
+        );
+        throw new LLMError(
+          503,
+          this.providerName,
+          "Network timeout contacting AI provider",
+          error as Error,
+        );
+      }
+
+      if (upstream.status !== 429 || attempt === 1) break;
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
+
+    if (!upstream) {
+      throw new LLMError(503, this.providerName, "AI provider did not respond");
+    }
+
     if (!upstream.ok) {
       if (upstream.status === 429) {
         throw new LLMError(429, this.providerName, "Rate limit exceeded");
       }
-      const errorBody = await upstream
-        .text()
-        .catch(() => "Unable to read error text");
-      throw new LLMError(
-        upstream.status,
-        this.providerName,
-        `Upstream error: ${errorBody}`,
-      );
+      throw await this.parseUpstreamError(upstream);
     }
     return (await upstream.json()) as GeminiPayload;
   }

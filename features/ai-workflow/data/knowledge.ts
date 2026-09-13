@@ -1,13 +1,33 @@
 import { PROFILE_CONTACT } from "@/features/contact/data/contact";
-import { getProjectKnowledgeDigests } from "@/features/projects/lib/projects";
+import {
+  getProjectKnowledgeDigests,
+  rankProjectKnowledge,
+} from "@/features/projects/lib/projects";
 import { getSkillCategories } from "@/features/home/lib/skills";
 import { getAllTechnologies } from "@/features/home/lib/technologies";
 import { ABOUT_HIGHLIGHTS } from "@/features/about/data/about";
 
 export interface ProjectKnowledge {
+  slug: string;
   title: string;
+  category?: string;
   summary: string;
+  fullDescription: string;
+  features: string[];
   technologies: string[];
+  skills: string[];
+  architecture?: string;
+  dataFlow?: string;
+  reactPatterns: { name: string; rationale: string }[];
+  challenges: { challenge: string; resolution: string }[];
+  lessonsLearned?: string;
+  engineeringDecisions: {
+    decision: string;
+    alternatives: string[];
+    rationale: string;
+  }[];
+  githubUrl?: string;
+  liveUrl?: string;
 }
 
 export interface PortfolioKnowledge {
@@ -26,7 +46,9 @@ export interface PortfolioKnowledge {
   projects: ProjectKnowledge[];
 }
 
-export async function getPortfolioKnowledge(): Promise<PortfolioKnowledge> {
+export async function getPortfolioKnowledge(
+  question = "",
+): Promise<PortfolioKnowledge> {
   const [projects, technologies, skillCategories] = await Promise.all([
     getProjectKnowledgeDigests(),
     getAllTechnologies(),
@@ -49,6 +71,6 @@ export async function getPortfolioKnowledge(): Promise<PortfolioKnowledge> {
       skills: group.skills.map((skill) => skill.name),
     })),
     technologies: technologies.map((technology) => technology.name),
-    projects,
+    projects: rankProjectKnowledge(projects, question).slice(0, 5),
   };
 }

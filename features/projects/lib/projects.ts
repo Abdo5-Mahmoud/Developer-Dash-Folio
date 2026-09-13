@@ -4,6 +4,7 @@ import { cache } from "react";
 
 import { connectToDatabase } from "@/lib/mongodb";
 import { ProjectModel, type ProjectDocument } from "@/lib/models/project";
+import { SkillModel } from "@/lib/models/skill";
 
 import type {
   Project,
@@ -191,29 +192,144 @@ export const getProjectBySlug = cache(
 // ---------------- Knowledge digest (projected, used by AI assistant) ----------------
 
 export type ProjectKnowledgeDigest = {
+  slug: string;
   title: string;
+  category?: string;
   summary: string;
+  fullDescription: string;
+  features: string[];
   technologies: string[];
+  skills: string[];
+  architecture?: string;
+  dataFlow?: string;
+  reactPatterns: { name: string; rationale: string }[];
+  challenges: { challenge: string; resolution: string }[];
+  lessonsLearned?: string;
+  engineeringDecisions: {
+    decision: string;
+    alternatives: string[];
+    rationale: string;
+  }[];
+  githubUrl?: string;
+  liveUrl?: string;
 };
+
+function limitText(value: unknown, maxLength: number): string | undefined {
+  return typeof value === "string" && value.trim()
+    ? value.trim().slice(0, maxLength)
+    : undefined;
+}
+
+function limitStrings(values: unknown, maxItems: number, maxLength: number) {
+  return Array.isArray(values)
+    ? values
+        .filter((value): value is string => typeof value === "string")
+        .map((value) => value.trim().slice(0, maxLength))
+        .filter(Boolean)
+        .slice(0, maxItems)
+    : [];
+}
+
+function selectProjectKnowledge(
+  project: ProjectKnowledgeDigest,
+  question: string,
+): number {
+  const normalizedQuestion = question.toLowerCase();
+  const searchable = [
+    project.title,
+    project.slug,
+    project.category ?? "",
+    ...project.technologies,
+    ...project.skills,
+  ]
+    .join(" ")
+    .toLowerCase();
+  return normalizedQuestion
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length > 2 && searchable.includes(token)).length;
+}
+
+export function rankProjectKnowledge(
+  projects: ProjectKnowledgeDigest[],
+  question = "",
+): ProjectKnowledgeDigest[] {
+  if (!question.trim()) return projects;
+  return [...projects].sort(
+    (first, second) =>
+      selectProjectKnowledge(second, question) -
+      selectProjectKnowledge(first, question),
+  );
+}
 
 export async function getProjectKnowledgeDigests(): Promise<
   ProjectKnowledgeDigest[]
 > {
   await connectToDatabase();
-  const docs = (await ProjectModel.find(
-    { status: "published" as const },
-    { _id: 0, title: 1, summary: 1, "techStack.name": 1 },
-  )
-    .sort({ displayOrder: 1, createdAt: 1 })
-    .lean()) as Array<{
-    title: string;
-    summary: string;
-    techStack?: { name: string }[];
-  }>;
-  return docs.map((doc) => ({
-    title: doc.title,
-    summary: doc.summary,
-    technologies: (doc.techStack ?? []).map((entry) => entry.name),
+  const [docs, skills] = await Promise.all([
+    ProjectModel.find(
+      { status: "published" as const },
+      {
+        _id: 0,
+        slug: 1,
+        title: 1,
+        category: 1,
+        summary: 1,
+        fullDescription: 1,
+        features: 1,
+        githubUrl: 1,
+        liveUrl: 1,
+        skillIds: 1,
+        "techStack.name": 1,
+        architectureExplanation: 1,
+        dataFlow: 1,
+        reactPatterns: 1,
+        challenges: 1,
+        lessonsLearned: 1,
+        engineeringDecisions: 1,
+      },
+    )
+      .sort({ displayOrder: 1, createdAt: 1 })
+      .lean(),
+    SkillModel.find({}, { _id: 1, name: 1 }).lean(),
+  ]);
+  const skillNames = new Map(
+    skills.map((skill) => [skill._id.toString(), skill.name]),
+  );
+
+  return (docs as Array<Record<string, unknown>>).map((doc) => ({
+    slug: String(doc.slug ?? ""),
+    title: String(doc.title ?? ""),
+    category: limitText(doc.category, 100),
+    summary: String(doc.summary ?? "").slice(0, 1000),
+    fullDescription: String(doc.fullDescription ?? "").slice(0, 6000),
+    features: limitStrings(doc.features, 20, 300),
+    technologies: Array.isArray(doc.techStack)
+      ? doc.techStack
+          .filter(
+            (entry): entry is { name?: unknown } =>
+              typeof entry === "object" && entry !== null,
+          )
+          .map((entry) => limitText(entry.name, 100))
+          .filter((name): name is string => Boolean(name))
+          .slice(0, 30)
+      : [],
+    skills: limitStrings(doc.skillIds, 30, 100).map(
+      (id) => skillNames.get(id) ?? id,
+    ),
+    architecture: limitText(doc.architectureExplanation, 3000),
+    dataFlow: limitText(doc.dataFlow, 3000),
+    reactPatterns: Array.isArray(doc.reactPatterns)
+      ? doc.reactPatterns.slice(0, 15)
+      : [],
+    challenges: Array.isArray(doc.challenges)
+      ? doc.challenges.slice(0, 15)
+      : [],
+    lessonsLearned: limitText(doc.lessonsLearned, 2000),
+    engineeringDecisions: Array.isArray(doc.engineeringDecisions)
+      ? doc.engineeringDecisions.slice(0, 15)
+      : [],
+    githubUrl: limitText(doc.githubUrl, 2000),
+    liveUrl: limitText(doc.liveUrl, 2000),
   }));
 }
 

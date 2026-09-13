@@ -29,10 +29,12 @@ export async function askPortfolioAssistant(
     body: JSON.stringify({ question }),
   });
 
-  const result = (await response.json()) as AiWorkflowResponse;
+  const result = (await response.json()) as AiWorkflowResponse & {
+    error?: string;
+  };
 
   if (!response.ok || typeof result.answer !== "string") {
-    throw new Error("Assistant request failed");
+    throw new Error(result.error ?? "Assistant request failed");
   }
 
   return result;

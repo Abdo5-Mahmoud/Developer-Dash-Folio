@@ -12,8 +12,24 @@ const tracker =
 if (process.env.NODE_ENV !== "production") {
   globalForRateLimit.rateLimitTracker = tracker;
 }
-const LIMIT = 3;
+const LIMIT = 10;
 const WINDOW = 1000 * 60; // 1 minute
+const MAX_TRACKER_ENTRIES = 500;
+let lastCleanUpTime = Date.now();
+
+function cleanupStaleRecords(now: number): void {
+  const timeFromLastClean = now - lastCleanUpTime;
+  const isOverCapacity = tracker.size > MAX_TRACKER_ENTRIES;
+
+  if (timeFromLastClean < WINDOW && !isOverCapacity) {
+    return;
+  }
+
+  lastCleanUpTime = now;
+  for (const [key, record] of tracker.entries()) {
+    if (now > record.resetTime) tracker.delete(key);
+  }
+}
 
 export function getClientIp(req: Request): string {
   const forwarded = req.headers.get("x-forwarded-for");
@@ -37,6 +53,7 @@ export function checkRateLimit({
 }): { success: boolean; remaining: number } {
   const key = keyPrefix ? `${keyPrefix}:${ip}` : ip;
   const now = Date.now();
+  cleanupStaleRecords(now);
   const record = tracker.get(key);
   // console.log(record);
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { DeleteProjectButton } from "@/components/admin/delete-project-button";
+import { SeedProjectsButton } from "@/components/admin/seed-projects-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAllProjectsAdmin } from "@/features/projects/lib/projects";
@@ -21,9 +22,12 @@ export default async function AdminDashboardPage() {
               : `${projects.length} project${projects.length === 1 ? "" : "s"} (drafts and published)`}
           </p>
         </div>
-        <Button asChild className="w-fit">
-          <Link href="/admin/projects/new">+ New project</Link>
-        </Button>
+        <div className="flex flex-wrap items-start justify-end gap-2">
+          <SeedProjectsButton />
+          <Button asChild className="w-fit">
+            <Link href="/admin/projects/new">+ New project</Link>
+          </Button>
+        </div>
       </div>
 
       {projects.length === 0 ? (
@@ -33,14 +37,25 @@ export default async function AdminDashboardPage() {
       ) : (
         <ul className="flex flex-col divide-y rounded-lg border border-border bg-surface">
           {projects.map((project) => (
-            <li key={project.id} className="flex items-center justify-between gap-4 px-4 py-3">
+            <li
+              key={project.id}
+              className="flex items-center justify-between gap-4 px-4 py-3"
+            >
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="truncate font-medium text-foreground">{project.title}</span>
-                  <Badge variant={project.status === "published" ? "success" : "warning"}>
+                  <span className="truncate font-medium text-foreground">
+                    {project.title}
+                  </span>
+                  <Badge
+                    variant={
+                      project.status === "published" ? "success" : "warning"
+                    }
+                  >
                     {project.status}
                   </Badge>
-                  {project.featured && <Badge variant="neutral">featured</Badge>}
+                  {project.featured && (
+                    <Badge variant="neutral">featured</Badge>
+                  )}
                 </div>
                 <p className="mt-0.5 truncate font-mono text-xs text-muted-foreground">
                   /{project.slug} · updated{" "}
