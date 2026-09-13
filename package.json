@@ -8,9 +8,11 @@
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-tabs": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.6",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.0.0",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.475.0",
     "mongoose": "^9.9.4",
     "next": "^16.0.0",
@@ -23,6 +25,7 @@
     "dev": "next dev",
     "build": "next build",
     "test": "jest",
+    "seed:owner": "node scripts/seed-owner.mjs",
     "seed:skills-technologies": "node scripts/seed-skills-technologies.mjs",
     "seed:projects": "node scripts/seed-projects.mjs",
     "hash:admin-password": "node scripts/generate-admin-password-hash.mjs"
@@ -30,6 +33,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
     "@types/jest": "^29.5.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

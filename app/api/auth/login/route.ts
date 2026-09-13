@@ -5,7 +5,7 @@ import {
   SESSION_COOKIE_NAME,
   sanitizeRedirectPath,
   sessionCookie,
-  validateAdminCredentials,
+  authenticateOwner,
 } from "@/lib/auth";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limiter";
 
@@ -42,9 +42,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    const isValid = await validateAdminCredentials(email, password);
+    const owner = await authenticateOwner(email, password);
 
-    if (!isValid) {
+    if (!owner) {
       return NextResponse.redirect(
         new URL("/login?error=invalid", request.url),
         303,
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     );
     response.cookies.set(
       SESSION_COOKIE_NAME,
-      createSession(email),
+      await createSession(owner),
       sessionCookie,
     );
     return response;

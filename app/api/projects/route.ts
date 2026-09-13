@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const project = await createProject(values, status);
+    const project = await createProject(values, status, session.userId);
     return Response.json({ ok: true, project }, { status: 201 });
   } catch {
     return Response.json({ ok: false }, { status: 500 });

@@ -24,7 +24,8 @@ export async function PUT(request: Request, { params }: RouteContext) {
     return Response.json({ ok: false }, { status: 400 });
   }
   const body = raw as Record<string, unknown>;
-  const status: ProjectStatus = body.status === "published" ? "published" : "draft";
+  const status: ProjectStatus =
+    body.status === "published" ? "published" : "draft";
 
   const values = parseProjectPayload(body);
   if (!values) {
@@ -37,7 +38,7 @@ export async function PUT(request: Request, { params }: RouteContext) {
   }
 
   try {
-    const project = await updateProject(id, values, status);
+    const project = await updateProject(id, values, status, session.userId);
     if (!project) {
       return Response.json({ ok: false }, { status: 404 });
     }
@@ -55,7 +56,7 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
 
   const { id } = await params;
   try {
-    const deleted = await deleteProject(id);
+    const deleted = await deleteProject(id, session.userId);
     if (!deleted) {
       return Response.json({ ok: false }, { status: 404 });
     }

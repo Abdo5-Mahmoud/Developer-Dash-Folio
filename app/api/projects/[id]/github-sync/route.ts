@@ -8,12 +8,13 @@ import {
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function POST(_request: Request, { params }: RouteContext) {
-  if (!(await requireAdminSession())) {
+  const session = await requireAdminSession();
+  if (!session) {
     return Response.json({ ok: false }, { status: 401 });
   }
 
   const { id } = await params;
-  const project = await getProjectById(id);
+  const project = await getProjectById(id, session.userId);
   if (!project) return Response.json({ ok: false }, { status: 404 });
   if (!project.githubUrl) {
     return Response.json(
@@ -24,10 +25,14 @@ export async function POST(_request: Request, { params }: RouteContext) {
 
   try {
     const githubMetadata = await fetchGithubMetadata(project.githubUrl);
-    const updatedProject = await updateProjectGithubMetadata(id, {
-      ...githubMetadata,
-      lastSyncedAt: new Date(githubMetadata.lastSyncedAt ?? Date.now()),
-    });
+    const updatedProject = await updateProjectGithubMetadata(
+      id,
+      {
+        ...githubMetadata,
+        lastSyncedAt: new Date(githubMetadata.lastSyncedAt ?? Date.now()),
+      },
+      session.userId,
+    );
     return Response.json({ ok: true, project: updatedProject });
   } catch (error) {
     const message =

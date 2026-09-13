@@ -47,7 +47,8 @@ function technologyCategory(name: string) {
 }
 
 export async function POST() {
-  if (!(await requireAdminSession())) {
+  const session = await requireAdminSession();
+  if (!session) {
     return Response.json({ ok: false }, { status: 401 });
   }
 
@@ -96,6 +97,7 @@ export async function POST() {
         { slug: config.slug },
         {
           $set: {
+            ownerId: session.userId,
             title: imported.title,
             category: config.category,
             features: imported.features,

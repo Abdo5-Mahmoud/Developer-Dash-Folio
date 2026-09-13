@@ -22,6 +22,7 @@ function toProject(
 ): Project {
   return {
     id: doc._id.toString(),
+    ownerId: doc.ownerId,
     slug: doc.slug,
     title: doc.title,
     summary: doc.summary,
@@ -335,14 +336,26 @@ export async function getProjectKnowledgeDigests(): Promise<
 
 // ---------------- Admin reads (drafts included) ----------------
 
-export async function getAllProjectsAdmin(): Promise<Project[]> {
-  return getAllProjects(true);
+export async function getAllProjectsAdmin(
+  ownerId?: string,
+): Promise<Project[]> {
+  await connectToDatabase();
+  const docs = await ProjectModel.find(ownerId ? { ownerId } : {})
+    .sort({ displayOrder: 1, createdAt: 1 })
+    .lean();
+  return docs.map((doc) => toProject(doc as Parameters<typeof toProject>[0]));
 }
 
-export async function getProjectById(id: string): Promise<Project | null> {
+export async function getProjectById(
+  id: string,
+  ownerId?: string,
+): Promise<Project | null> {
   if (!isValidObjectId(id)) return null;
   await connectToDatabase();
-  const doc = await ProjectModel.findById(id).lean<
+  const doc = await ProjectModel.findOne({
+    _id: id,
+    ...(ownerId ? { ownerId } : {}),
+  }).lean<
     | (ProjectDocument & {
         _id: Types.ObjectId;
         createdAt?: Date;
@@ -652,10 +665,11 @@ function revalidatePublicProjectPages(slug: string) {
 export async function createProject(
   values: ProjectInput,
   status: ProjectStatus,
+  ownerId?: string,
 ): Promise<Project> {
   await connectToDatabase();
   const slug = await uniqueSlug(values.slug || slugify(values.title));
-  const doc = await ProjectModel.create({ ...values, slug, status });
+  const doc = await ProjectModel.create({ ...values, ownerId, slug, status });
   revalidatePublicProjectPages(slug);
   return toProject(doc);
 }
@@ -664,22 +678,32 @@ export async function updateProject(
   id: string,
   values: ProjectInput,
   status: ProjectStatus,
+  ownerId?: string,
 ): Promise<Project | null> {
   if (!isValidObjectId(id)) return null;
   await connectToDatabase();
-  const existing = await ProjectModel.findById(id);
+  const existing = await ProjectModel.findOne({
+    _id: id,
+    ...(ownerId ? { ownerId } : {}),
+  });
   if (!existing) return null;
   // Slug is immutable after create — public URLs stay stable.
-  existing.set({ ...values, slug: existing.slug, status });
+  existing.set({ ...values, ownerId, slug: existing.slug, status });
   const doc = await existing.save();
   revalidatePublicProjectPages(doc.slug);
   return toProject(doc);
 }
 
-export async function deleteProject(id: string): Promise<boolean> {
+export async function deleteProject(
+  id: string,
+  ownerId?: string,
+): Promise<boolean> {
   if (!isValidObjectId(id)) return false;
   await connectToDatabase();
-  const doc = await ProjectModel.findByIdAndDelete(id);
+  const doc = await ProjectModel.findOneAndDelete({
+    _id: id,
+    ...(ownerId ? { ownerId } : {}),
+  });
   if (!doc) return false;
   revalidatePublicProjectPages(doc.slug);
   return true;
@@ -688,11 +712,12 @@ export async function deleteProject(id: string): Promise<boolean> {
 export async function updateProjectGithubMetadata(
   id: string,
   githubMetadata: NonNullable<ProjectDocument["githubMetadata"]>,
+  ownerId?: string,
 ): Promise<Project | null> {
   if (!isValidObjectId(id)) return null;
   await connectToDatabase();
   const doc = await ProjectModel.findByIdAndUpdate(
-    id,
+    { _id: id, ...(ownerId ? { ownerId } : {}) },
     { $set: { githubMetadata } },
     { new: true },
   );

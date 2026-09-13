@@ -5,11 +5,13 @@ import { SeedProjectsButton } from "@/components/admin/seed-projects-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getAllProjectsAdmin } from "@/features/projects/lib/projects";
+import { requireAdminSession } from "@/lib/session";
 
 export const metadata = { title: "Admin — Projects" };
 
 export default async function AdminDashboardPage() {
-  const projects = await getAllProjectsAdmin();
+  const session = await requireAdminSession();
+  const projects = await getAllProjectsAdmin(session?.userId);
 
   return (
     <div className="flex flex-col gap-6">

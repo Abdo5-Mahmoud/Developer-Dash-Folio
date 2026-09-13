@@ -91,6 +91,7 @@ const GithubMetadataSchema = new Schema(
 
 const ProjectSchema = new Schema(
   {
+    ownerId: { type: String, index: true },
     slug: { type: String, required: true, unique: true, index: true },
     title: { type: String, required: true },
     category: String,
@@ -131,6 +132,7 @@ const ProjectSchema = new Schema(
 );
 
 export interface ProjectDocument extends Document {
+  ownerId?: string;
   slug: string;
   title: string;
   category?: string;

@@ -1,11 +1,20 @@
 import { jest, describe, test, expect, beforeEach } from "@jest/globals";
 
-type TestSession = { email: string; expiresAt: number };
+type TestSession = {
+  email: string;
+  userId: string;
+  role: "owner";
+  expiresAt: number;
+};
 
 const mockRequireAdminSession = jest.fn<() => Promise<TestSession | null>>();
-const mockValidateAdminCredentials =
-  jest.fn<(...args: unknown[]) => Promise<boolean>>();
-const mockCreateSession = jest.fn<(email: string) => string>();
+const mockAuthenticateOwner =
+  jest.fn<
+    (
+      ...args: unknown[]
+    ) => Promise<{ id: string; email: string; role: "owner" } | null>
+  >();
+const mockCreateSession = jest.fn<(...args: unknown[]) => string>();
 const mockParseProjectPayload = jest.fn<(...args: unknown[]) => unknown>();
 const mockValidateProject =
   jest.fn<(...args: unknown[]) => Record<string, string>>();
@@ -34,9 +43,8 @@ jest.mock("@/lib/auth", () => ({
     sameSite: "lax",
     secure: false,
   },
-  createSession: (email: string) => mockCreateSession(email),
-  validateAdminCredentials: (...args: unknown[]) =>
-    mockValidateAdminCredentials(...args),
+  createSession: (...args: unknown[]) => mockCreateSession(...args),
+  authenticateOwner: (...args: unknown[]) => mockAuthenticateOwner(...args),
 }));
 
 jest.mock("@/lib/session", () => ({
@@ -61,13 +69,15 @@ const { POST: createProjectRoutePOST } =
 describe("API boundary routes", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCreateSession.mockImplementation(
-      (email: string) => `session:${String(email).trim().toLowerCase()}`,
-    );
+    mockCreateSession.mockImplementation(() => "session:owner");
   });
 
   test("POST /api/auth/login redirects successfully with a session cookie", async () => {
-    mockValidateAdminCredentials.mockResolvedValue(true);
+    mockAuthenticateOwner.mockResolvedValue({
+      id: "owner-1",
+      email: "admin@example.com",
+      role: "owner",
+    });
 
     const form = new URLSearchParams({
       email: "admin@example.com",
@@ -89,14 +99,14 @@ describe("API boundary routes", () => {
     expect(response.headers.get("set-cookie") ?? "").toContain(
       "devfolio_admin_session=",
     );
-    expect(mockValidateAdminCredentials).toHaveBeenCalledWith(
+    expect(mockAuthenticateOwner).toHaveBeenCalledWith(
       "admin@example.com",
       "secret",
     );
   });
 
   test("POST /api/auth/login redirects with invalid credentials", async () => {
-    mockValidateAdminCredentials.mockResolvedValue(false);
+    mockAuthenticateOwner.mockResolvedValue(null);
 
     const response = await loginRoutePOST(
       new Request("https://example.com/login", {
@@ -117,6 +127,8 @@ describe("API boundary routes", () => {
   test("POST /api/projects creates a project for an authenticated admin", async () => {
     mockRequireAdminSession.mockResolvedValue({
       email: "admin@example.com",
+      userId: "owner-1",
+      role: "owner",
       expiresAt: Date.now() + 60_000,
     });
     mockParseProjectPayload.mockReturnValue({
@@ -171,6 +183,8 @@ describe("API boundary routes", () => {
   test("POST /api/projects rejects validation failures with 422", async () => {
     mockRequireAdminSession.mockResolvedValue({
       email: "admin@example.com",
+      userId: "owner-1",
+      role: "owner",
       expiresAt: Date.now() + 60_000,
     });
     mockParseProjectPayload.mockReturnValue({
@@ -202,6 +216,8 @@ describe("API boundary routes", () => {
   test("PUT /api/projects/[id] updates a project for an authenticated admin", async () => {
     mockRequireAdminSession.mockResolvedValue({
       email: "admin@example.com",
+      userId: "owner-1",
+      role: "owner",
       expiresAt: Date.now() + 60_000,
     });
     mockParseProjectPayload.mockReturnValue({
@@ -250,6 +266,8 @@ describe("API boundary routes", () => {
   test("PUT /api/projects/[id] returns 422 when validation fails", async () => {
     mockRequireAdminSession.mockResolvedValue({
       email: "admin@example.com",
+      userId: "owner-1",
+      role: "owner",
       expiresAt: Date.now() + 60_000,
     });
     mockParseProjectPayload.mockReturnValue({
@@ -281,6 +299,8 @@ describe("API boundary routes", () => {
   test("PUT /api/projects/[id] returns 404 when the project is missing", async () => {
     mockRequireAdminSession.mockResolvedValue({
       email: "admin@example.com",
+      userId: "owner-1",
+      role: "owner",
       expiresAt: Date.now() + 60_000,
     });
     mockParseProjectPayload.mockReturnValue({
@@ -308,6 +328,8 @@ describe("API boundary routes", () => {
   test("DELETE /api/projects/[id] deletes a project for an authenticated admin", async () => {
     mockRequireAdminSession.mockResolvedValue({
       email: "admin@example.com",
+      userId: "owner-1",
+      role: "owner",
       expiresAt: Date.now() + 60_000,
     });
     mockDeleteProject.mockResolvedValue(true);
@@ -340,6 +362,8 @@ describe("API boundary routes", () => {
   test("DELETE /api/projects/[id] returns 404 when the project is missing", async () => {
     mockRequireAdminSession.mockResolvedValue({
       email: "admin@example.com",
+      userId: "owner-1",
+      role: "owner",
       expiresAt: Date.now() + 60_000,
     });
     mockDeleteProject.mockResolvedValue(false);

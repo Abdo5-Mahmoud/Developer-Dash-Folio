@@ -1,6 +1,6 @@
 // Imports the first public portfolio projects from GitHub into MongoDB.
 // Idempotent: rerunning this script updates the selected records by slug.
-// Usage: npm run seed:projects
+// Usage: npm run seed:projects -- owner@example.com
 import { readFileSync } from "node:fs";
 import mongoose from "mongoose";
 
@@ -24,6 +24,14 @@ loadLocalEnvironment();
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
   console.error("Missing MONGODB_URI environment variable");
+  process.exit(1);
+}
+
+const OWNER_EMAIL = (process.argv[2] || process.env.OWNER_EMAIL)
+  ?.trim()
+  .toLowerCase();
+if (!OWNER_EMAIL) {
+  console.error("Usage: npm run seed:projects -- owner@example.com");
   process.exit(1);
 }
 
@@ -133,6 +141,9 @@ const Technology =
   mongoose.models.Technology || mongoose.model("Technology", TechnologySchema);
 const Project =
   mongoose.models.Project || mongoose.model("Project", ProjectSchema);
+const User =
+  mongoose.models.User ||
+  mongoose.model("User", new mongoose.Schema({ email: String, role: String }));
 
 async function githubRequest(path) {
   const response = await fetch(`https://api.github.com${path}`, {
@@ -186,7 +197,7 @@ async function ensureTechnologies(languages) {
   return entries;
 }
 
-async function importProject(config) {
+async function importProject(config, ownerId) {
   const basePath = `/repos/${config.owner}/${config.repository}`;
   const [details, languageMap, readme] = await Promise.all([
     githubRequest(basePath),
@@ -210,6 +221,7 @@ async function importProject(config) {
     { slug: config.slug },
     {
       $set: {
+        ownerId,
         title: details.name,
         category: config.category,
         features: (details.topics ?? []).slice(0, 20),
@@ -249,8 +261,15 @@ async function importProject(config) {
 
 try {
   await mongoose.connect(MONGODB_URI);
+  const owner = await User.findOne({
+    email: OWNER_EMAIL,
+    role: "owner",
+  }).lean();
+  if (!owner) {
+    throw new Error("Owner account not found. Run npm run seed:owner first.");
+  }
   for (const project of PROJECTS) {
-    await importProject(project);
+    await importProject(project, owner._id.toString());
   }
   console.log(`Published ${PROJECTS.length} projects.`);
 } catch (error) {

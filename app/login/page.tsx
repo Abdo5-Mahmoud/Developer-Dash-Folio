@@ -1,11 +1,13 @@
+import Link from "next/link";
+
 import { sanitizeRedirectPath } from "@/lib/auth";
 
 type LoginPageProps = {
-  searchParams: Promise<{ error?: string; next?: string }>;
+  searchParams: Promise<{ error?: string; created?: string; next?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { error, next } = await searchParams;
+  const { error, created, next } = await searchParams;
   const destination = sanitizeRedirectPath(next);
 
   return (
@@ -16,6 +18,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         {error === "invalid" && (
           <p className="mt-4 rounded-md bg-danger-muted px-3 py-2 text-sm text-danger" role="alert">
             Invalid email or password.
+          </p>
+        )}
+        {created === "1" && (
+          <p className="mt-4 rounded-md bg-success-muted px-3 py-2 text-sm text-success" role="status">
+            Account created successfully. Sign in to continue.
           </p>
         )}
         <form action="/api/auth/login" method="post" className="mt-6 flex flex-col gap-4">
@@ -32,6 +39,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Sign in
           </button>
         </form>
+        <p className="mt-5 text-center text-sm text-muted-foreground">
+          First setup?{" "}
+          <Link href="/signup" className="font-medium text-accent hover:text-accent-hover">
+            Create the owner account
+          </Link>
+        </p>
       </section>
     </main>
   );
